@@ -1,0 +1,442 @@
+import clr
+
+clr.AddReference("RevitAPI")
+from Autodesk.Revit.DB import (
+    ElementTransformUtils,
+    FamilyInstance,
+    FilteredElementCollector,
+    GeometryInstance,
+    ImportInstance,
+    LocationPoint,
+    Options,
+    Solid,
+    SolidUtils,
+    Transform,
+    UnitUtils,
+    XYZ,
+)
+
+clr.AddReference("RevitServices")
+from RevitServices.Persistence import DocumentManager
+from RevitServices.Transactions import TransactionManager
+
+doc = DocumentManager.Instance.CurrentDBDocument
+uiapp = DocumentManager.Instance.CurrentUIApplication
+uidoc = uiapp.ActiveUIDocument if uiapp else None
+
+# IN[0]: max search distance in mm
+# IN[1]: legacy input. In A option we do not delete source elements.
+max_distance_mm = IN[0] if len(IN) > 0 else 3000
+delete_sources = IN[1] if len(IN) > 1 else False
+
+
+def to_bool(value):
+    """Convert Dynamo input values into a clean True/False."""
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    return str(value).strip().lower() in ["true", "1", "yes", "y"]
+
+
+def to_float(value, default_value):
+    """Return a float when possible, otherwise use the fallback."""
+    try:
+        return float(value)
+    except Exception:
+        return default_value
+
+
+def to_internal_mm(value_in_mm):
+    """Convert millimeters into Revit internal units."""
+    try:
+        from Autodesk.Revit.DB import UnitTypeId
+
+        return UnitUtils.ConvertToInternalUnits(value_in_mm, UnitTypeId.Millimeters)
+    except Exception:
+        from Autodesk.Revit.DB import DisplayUnitType
+
+        return UnitUtils.ConvertToInternalUnits(value_in_mm, DisplayUnitType.DUT_MILLIMETERS)
+
+
+def from_internal_mm(value_in_internal_units):
+    """Convert Revit internal units back into millimeters for readable output."""
+    try:
+        from Autodesk.Revit.DB import UnitTypeId
+
+        return UnitUtils.ConvertFromInternalUnits(value_in_internal_units, UnitTypeId.Millimeters)
+    except Exception:
+        from Autodesk.Revit.DB import DisplayUnitType
+
+        return UnitUtils.ConvertFromInternalUnits(value_in_internal_units, DisplayUnitType.DUT_MILLIMETERS)
+
+
+def normalize_xyz(vector):
+    """Return a unit vector, or None when the vector is too small."""
+    if vector is None:
+        return None
+
+    try:
+        length = vector.GetLength()
+    except Exception:
+        return None
+
+    if length < 1e-9:
+        return None
+
+    return vector.Normalize()
+
+
+def safe_int_id(element):
+    """Read an element id safely so logging never crashes the script."""
+    try:
+        return element.Id.IntegerValue
+    except Exception:
+        return None
+
+
+def get_symbol_label(symbol):
+    """Build a simple Family : Type label for the Watch node."""
+    try:
+        family_name = symbol.Family.Name
+    except Exception:
+        family_name = "UnknownFamily"
+
+    try:
+        type_name = symbol.Name
+    except Exception:
+        type_name = "UnknownType"
+
+    return "{0} : {1}".format(family_name, type_name)
+
+
+def get_selected_family_instances():
+    """
+    Read the current Revit selection and keep only FamilyInstance elements.
+    We move these existing instances instead of creating new hosted instances.
+    """
+    if uidoc is None:
+        return []
+
+    selected_ids = list(uidoc.Selection.GetElementIds())
+    instances = []
+
+    for element_id in selected_ids:
+        element = doc.GetElement(element_id)
+        if isinstance(element, FamilyInstance):
+            instances.append(element)
+
+    return instances
+
+
+def get_instance_point(instance):
+    """
+    We need a single base point to measure distance and move the element.
+    Families without LocationPoint are skipped in this version.
+    """
+    location = instance.Location
+    if isinstance(location, LocationPoint):
+        return location.Point
+    return None
+
+
+def get_import_geometry_options():
+    """Geometry options used to read imported solids from ImportInstance."""
+    options = Options()
+    options.IncludeNonVisibleObjects = False
+    options.ComputeReferences = False
+    return options
+
+
+def transform_solid_if_needed(solid, transform):
+    """Apply accumulated transforms so every solid is evaluated in model coordinates."""
+    if solid is None or solid.Volume <= 1e-9:
+        return None
+
+    if transform is None:
+        return solid
+
+    try:
+        return SolidUtils.CreateTransformed(solid, transform)
+    except Exception:
+        return None
+
+
+def collect_solids_from_geometry(geometry_element, current_transform, output_solids):
+    """
+    Recursively walk through imported geometry.
+    Import geometry often contains nested GeometryInstance objects,
+    so we flatten everything into transformed solids first.
+    """
+    if geometry_element is None:
+        return
+
+    for geometry_object in geometry_element:
+        if isinstance(geometry_object, Solid):
+            solid = transform_solid_if_needed(geometry_object, current_transform)
+            if solid is not None:
+                output_solids.append(solid)
+            continue
+
+        if isinstance(geometry_object, GeometryInstance):
+            try:
+                instance_geometry = geometry_object.GetInstanceGeometry()
+            except Exception:
+                instance_geometry = None
+
+            next_transform = current_transform
+            try:
+                instance_transform = geometry_object.Transform
+                if next_transform is None:
+                    next_transform = instance_transform
+                else:
+                    next_transform = next_transform.Multiply(instance_transform)
+            except Exception:
+                pass
+
+            collect_solids_from_geometry(instance_geometry, next_transform, output_solids)
+
+
+def get_import_instance_face_candidates():
+    """
+    Collect face candidates from imported geometry.
+
+    Why this is the A option:
+    - We do not try to host the family on the imported face.
+    - We only use the imported face as a target location calculator.
+    - After finding the nearest point, we move the already selected family.
+    """
+    candidates = []
+    options = get_import_geometry_options()
+
+    import_instances = FilteredElementCollector(doc).OfClass(ImportInstance).WhereElementIsNotElementType()
+
+    for import_instance in import_instances:
+        solids = []
+
+        try:
+            geometry_element = import_instance.get_Geometry(options)
+        except Exception:
+            geometry_element = None
+
+        collect_solids_from_geometry(geometry_element, Transform.Identity, solids)
+
+        for solid in solids:
+            try:
+                faces = solid.Faces
+            except Exception:
+                faces = None
+
+            if faces is None:
+                continue
+
+            for face in faces:
+                candidates.append({
+                    "face": face,
+                    "hostElement": import_instance,
+                    "hostKind": "importInstance",
+                })
+
+    return candidates
+
+
+def find_nearest_face(point, candidates, max_distance_internal):
+    """
+    Find the closest face to the current family point.
+    We use face.Project(point) so the imported geometry acts like a target surface.
+    """
+    best_match = None
+    best_distance = None
+
+    for candidate in candidates:
+        face = candidate["face"]
+
+        try:
+            projection = face.Project(point)
+        except Exception:
+            projection = None
+
+        if projection is None:
+            continue
+
+        projected_point = projection.XYZPoint
+        if projected_point is None:
+            continue
+
+        distance = point.DistanceTo(projected_point)
+        if max_distance_internal > 0 and distance > max_distance_internal:
+            continue
+
+        try:
+            normal = normalize_xyz(face.ComputeNormal(projection.UVPoint))
+        except Exception:
+            normal = None
+
+        if normal is None:
+            continue
+
+        if best_distance is None or distance < best_distance:
+            best_distance = distance
+            best_match = {
+                "hostElement": candidate["hostElement"],
+                "hostKind": candidate["hostKind"],
+                "point": projected_point,
+                "normal": normal,
+                "distance": distance,
+            }
+
+    return best_match
+
+
+def make_result(**kwargs):
+    """Keep the OUT structure stable and easy to read in Dynamo Watch."""
+    result = {
+        "selectedCount": 0,
+        "validSourceCount": 0,
+        "invalidSourceIds": [],
+        "maxDistanceMm": 0.0,
+        "deleteSources": False,
+        "movedIds": [],
+        "moveDetails": [],
+        "skipped": [],
+        "unhandledError": None,
+        "message": None,
+        "candidateSummary": {},
+    }
+    result.update(kwargs)
+    return result
+
+
+def main():
+    selected_instances = get_selected_family_instances()
+    max_distance_value = max(0.0, to_float(max_distance_mm, 3000.0))
+    max_distance_internal = to_internal_mm(max_distance_value)
+    delete_sources_value = to_bool(delete_sources)
+
+    if not selected_instances:
+        return make_result(
+            selectedCount=0,
+            validSourceCount=0,
+            maxDistanceMm=max_distance_value,
+            deleteSources=delete_sources_value,
+            message="Select the family instances in Revit first, then run Dynamo.",
+        )
+
+    invalid_instances = []
+    valid_instances = []
+
+    for instance in selected_instances:
+        if get_instance_point(instance) is None:
+            invalid_instances.append(instance.Id.IntegerValue)
+            continue
+
+        valid_instances.append(instance)
+
+    if not valid_instances:
+        return make_result(
+            selectedCount=len(selected_instances),
+            validSourceCount=0,
+            invalidSourceIds=invalid_instances,
+            maxDistanceMm=max_distance_value,
+            deleteSources=delete_sources_value,
+            message="No selected family instance has a usable LocationPoint.",
+        )
+
+    face_candidates = get_import_instance_face_candidates()
+
+    if not face_candidates:
+        return make_result(
+            selectedCount=len(selected_instances),
+            validSourceCount=len(valid_instances),
+            invalidSourceIds=invalid_instances,
+            maxDistanceMm=max_distance_value,
+            deleteSources=delete_sources_value,
+            candidateSummary={
+                "importFaceCount": 0,
+            },
+            message="No usable faces were found in ImportInstance geometry.",
+        )
+
+    moved_ids = []
+    move_details = []
+    skipped = []
+    unhandled_error = None
+
+    TransactionManager.Instance.EnsureInTransaction(doc)
+
+    try:
+        for instance in valid_instances:
+            instance_id = safe_int_id(instance)
+            symbol_label = get_symbol_label(instance.Symbol)
+            source_point = get_instance_point(instance)
+            nearest_face = find_nearest_face(source_point, face_candidates, max_distance_internal)
+
+            if nearest_face is None:
+                skipped.append({
+                    "sourceId": instance_id,
+                    "symbol": symbol_label,
+                    "reason": "No import surface was found within the search distance.",
+                })
+                continue
+
+            move_vector = nearest_face["point"] - source_point
+            if move_vector.GetLength() < 1e-9:
+                move_details.append({
+                    "sourceId": instance_id,
+                    "symbol": symbol_label,
+                    "hostId": safe_int_id(nearest_face["hostElement"]),
+                    "distanceMm": 0.0,
+                    "status": "alreadyOnSurface",
+                })
+                continue
+
+            move_scope = SubTransaction(doc)
+            move_scope.Start()
+
+            try:
+                ElementTransformUtils.MoveElement(doc, instance.Id, move_vector)
+                move_scope.Commit()
+
+                moved_ids.append(instance_id)
+                move_details.append({
+                    "sourceId": instance_id,
+                    "symbol": symbol_label,
+                    "hostId": safe_int_id(nearest_face["hostElement"]),
+                    "distanceMm": round(from_internal_mm(nearest_face["distance"]), 2),
+                    "status": "moved",
+                })
+            except Exception as exc:
+                move_scope.RollBack()
+                skipped.append({
+                    "sourceId": instance_id,
+                    "symbol": symbol_label,
+                    "hostId": safe_int_id(nearest_face["hostElement"]),
+                    "distanceMm": round(from_internal_mm(nearest_face["distance"]), 2),
+                    "reason": "MoveElement failed.",
+                    "errorType": type(exc).__name__,
+                    "error": str(exc),
+                })
+    except Exception as exc:
+        unhandled_error = "{0}: {1}".format(type(exc).__name__, exc)
+        raise
+    finally:
+        TransactionManager.Instance.TransactionTaskDone()
+
+    return make_result(
+        selectedCount=len(selected_instances),
+        validSourceCount=len(valid_instances),
+        invalidSourceIds=invalid_instances,
+        maxDistanceMm=max_distance_value,
+        deleteSources=delete_sources_value,
+        movedIds=moved_ids,
+        moveDetails=move_details,
+        skipped=skipped,
+        unhandledError=unhandled_error,
+        candidateSummary={
+            "importFaceCount": len(face_candidates),
+        },
+        message="A option completed. Selected family instances were moved to the nearest imported surface point. The delete option is ignored in this version.",
+    )
+
+
+OUT = main()

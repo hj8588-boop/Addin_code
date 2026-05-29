@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Revit MCP Addin</Name>
+    <Assembly>%APPDATA%\Autodesk\Revit\Addins\2024\RevitMcpAddin\RevitMcpAddin.dll</Assembly>
+    <AddInId>9E6350C5-0A50-4C25-A6F8-CA8B917BE319</AddInId>
+    <FullClassName>RevitMcpAddin.App</FullClassName>
+    <VendorId>CODEX</VendorId>
+    <VendorDescription>Claude MCP bridge for Autodesk Revit</VendorDescription>
+  </AddIn>
+</RevitAddIns>

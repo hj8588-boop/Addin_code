@@ -1,0 +1,482 @@
+{
+  "Uuid": "b4d9546d-97aa-4f30-8cc4-e47855d36389",
+  "IsCustomNode": false,
+  "Description": "Import Revit shared parameter values from Excel for selected categories.",
+  "Name": "SharedParameterValues_Import",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
+      "Id": "f1e452bddcff48368b5abfd1e5300d5e",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "dc63e569d90c47f58dd4c57ec2a9893d",
+          "Name": "",
+          "Description": "File Path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a file on the system and returns its file path",
+      "HintPath": "C:\\Users\\user\\Desktop\\codex\\다이나모\\SharedParameterValues_SharedParameters_20260327_110337.xlsx",
+      "InputValue": "다이나모\\SharedParameterValues_SharedParameters_20260327_110337.xlsx"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "ddf154f05d9143e6bfe6db8c0da0c49b",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "c239f5f766d1497f8c96fa5b514f92a1",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "SharedParameters"
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 208,
+      "SelectedString": "OST_ElectricalEquipment",
+      "Id": "d233af5e42374943a57d59fa8e8150bc",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "0a378d8884044eb38b73444b095ebcbc",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 212,
+      "SelectedString": "OST_ElectricalFixtures",
+      "Id": "ce9786f9e4f14adcb6d26c36c3d2038c",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "bd7f2b44f5bb46ee80cf0fb6ef0b6cbc",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 104,
+      "SelectedString": "OST_CableTrayFitting",
+      "Id": "d4f5b9d1d2814f6ca95df29722dcc61b",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "28a4f95166a84e70a9354e47707f7ed3",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.CreateList, CoreNodeModels",
+      "VariableInputPorts": true,
+      "Id": "af710fc5caa34b33943cad97db8c75ab",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "a1686f4b37f54df79420785ad68126b8",
+          "Name": "item0",
+          "Description": "Item Index #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "770348a4c5a74d38a8ba9d676cc96c17",
+          "Name": "item1",
+          "Description": "Item Index #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "7d8465f90d9547a7aa53d1f9a2d5417e",
+          "Name": "item2",
+          "Description": "Item Index #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "cc936f77550543d0947c318f5a9dd7f9",
+          "Name": "list",
+          "Description": "A list.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Makes a new list from the given inputs"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "script_path = r\"C:\\Users\\user\\Desktop\\codex\\shared_parameter_values_import.py\"\nnamespace = {\"IN\": IN}\nwith open(script_path, \"r\", encoding=\"utf-8\") as handle:\n    code = handle.read()\nexec(compile(code, script_path, \"exec\"), namespace)\nOUT = namespace.get(\"OUT\")\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "67f4df4181834471b3e09f087e48f943",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "c2b13e0a7fee4f1eb6f3ba1fe7e6a2d7",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "aa47edc29d61479394a8d5f88607fb17",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ea5143b19b534858ba1c17e355d431c2",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "8cacc6484ab040038804b7cbd72d7e9b",
+          "Name": "IN[3]",
+          "Description": "Input #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "4442dd1adf6242c2bbca4fb5eaf6af92",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "a6ac53f093b8487c9322a736f6e8c8f3",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "c009b5a0c79e47bd9dc3c68ea006b685",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": false
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "dc63e569d90c47f58dd4c57ec2a9893d",
+      "End": "c2b13e0a7fee4f1eb6f3ba1fe7e6a2d7",
+      "Id": "99390c805f8847c08297c653bb4612fe",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "c239f5f766d1497f8c96fa5b514f92a1",
+      "End": "aa47edc29d61479394a8d5f88607fb17",
+      "Id": "e9e17ca8135e41a5b834e4e87e5594cb",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "0a378d8884044eb38b73444b095ebcbc",
+      "End": "a1686f4b37f54df79420785ad68126b8",
+      "Id": "d3d818784ef6480b9744f751ffbd2df1",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "bd7f2b44f5bb46ee80cf0fb6ef0b6cbc",
+      "End": "770348a4c5a74d38a8ba9d676cc96c17",
+      "Id": "a40622af6f03458aa52f8632b1f3e9dd",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "28a4f95166a84e70a9354e47707f7ed3",
+      "End": "7d8465f90d9547a7aa53d1f9a2d5417e",
+      "Id": "0883e03ffc5f44339728ffefbc04b6be",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "cc936f77550543d0947c318f5a9dd7f9",
+      "End": "ea5143b19b534858ba1c17e355d431c2",
+      "Id": "7c035b8326704fc68801968cd1397d69",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "c009b5a0c79e47bd9dc3c68ea006b685",
+      "End": "8cacc6484ab040038804b7cbd72d7e9b",
+      "Id": "b8c25af7c7d64ba7a9ea9bbefb932357",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "SharedParameterValues_SharedParameters_20260327_110337.xlsx",
+      "ReferenceType": "External",
+      "Nodes": [
+        "f1e452bddcff48368b5abfd1e5300d5e"
+      ]
+    }
+  ],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.18",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "6.0",
+      "Data": {}
+    }
+  ],
+  "Author": "OpenAI Codex",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.18.1.5096",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 60.0,
+      "LookX": 0.0,
+      "LookY": 0.0,
+      "LookZ": 0.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "f1e452bddcff48368b5abfd1e5300d5e",
+        "Name": "File Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -255.0,
+        "Y": 80.0
+      },
+      {
+        "Id": "ddf154f05d9143e6bfe6db8c0da0c49b",
+        "Name": "String",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -255.0,
+        "Y": 215.0
+      },
+      {
+        "Id": "d233af5e42374943a57d59fa8e8150bc",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -255.0,
+        "Y": 350.0
+      },
+      {
+        "Id": "ce9786f9e4f14adcb6d26c36c3d2038c",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -255.0,
+        "Y": 470.0
+      },
+      {
+        "Id": "d4f5b9d1d2814f6ca95df29722dcc61b",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -255.0,
+        "Y": 590.0
+      },
+      {
+        "Id": "af710fc5caa34b33943cad97db8c75ab",
+        "Name": "List.Create",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 48.638208803754878,
+        "Y": 449.703158695928
+      },
+      {
+        "Id": "67f4df4181834471b3e09f087e48f943",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 433.7261768173355,
+        "Y": 225.20621144818131
+      },
+      {
+        "Id": "a6ac53f093b8487c9322a736f6e8c8f3",
+        "Name": "Boolean",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 55.018086621648706,
+        "Y": 716.09408364345245
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "8bfaa5b953e54cfe8d4aaf8d4f340a54",
+        "Title": "Inputs",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "f1e452bddcff48368b5abfd1e5300d5e",
+          "ddf154f05d9143e6bfe6db8c0da0c49b",
+          "d233af5e42374943a57d59fa8e8150bc",
+          "ce9786f9e4f14adcb6d26c36c3d2038c",
+          "d4f5b9d1d2814f6ca95df29722dcc61b",
+          "af710fc5caa34b33943cad97db8c75ab"
+        ],
+        "HasNestedGroups": false,
+        "Left": -265.0,
+        "Top": 30.0,
+        "Width": 636.0,
+        "Height": 692.0,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 80.0,
+        "InitialHeight": 655.0,
+        "TextblockHeight": 40.0,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "ef3368d7793d4f53a7da61f8d5fb9a0c",
+        "Title": "Import From Excel",
+        "DescriptionText": null,
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "67f4df4181834471b3e09f087e48f943"
+        ],
+        "HasNestedGroups": false,
+        "Left": 423.7261768173355,
+        "Top": 175.20621144818131,
+        "Width": 194.0,
+        "Height": 282.0,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 225.20621144818131,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 40.0,
+        "Background": "#FFF2C36B"
+      }
+    ],
+    "X": 200.81044960860069,
+    "Y": 306.76394276549036,
+    "Zoom": 0.53988513512309844
+  }
+}

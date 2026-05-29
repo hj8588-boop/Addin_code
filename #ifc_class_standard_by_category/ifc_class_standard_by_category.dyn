@@ -1,0 +1,1217 @@
+{
+  "Uuid": "2b7d6c8a-0b7d-4c3d-95ab-9839300e8f11",
+  "IsCustomNode": false,
+  "Description": "Assign IFC Class and IFC Standard values to elements by Revit category.",
+  "Name": "ifc_class_standard_by_category",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 108,
+      "SelectedString": "OST_CableTray",
+      "Id": "218986560e3450b9ae81b9057058aef5",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "7a80d31e443e5a89980e0be1cd92fafb",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 104,
+      "SelectedString": "OST_CableTrayFitting",
+      "Id": "e93a197ad25b526389c496b096b3ecda",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "39a2ff0823125c0cb202fc8eb2d4506e",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 208,
+      "SelectedString": "OST_ElectricalEquipment",
+      "Id": "3d92ae6c431854a48aaaa7f99651add0",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "167652c4cd525fabb43d9a2efadca10c",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "4434d1afb4b85ee4a81d5c80615116f6",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "9cab7f4a204f573894cc720e60414276",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "IfcCableCarrierSegment"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "ec0ef1577ff7500dbe6b09b47fc4af0c",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "0d54649a16ea5d2fa30f5abded3acad7",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "CABLETRAYSEGMENT"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "df9a5fee87d4538aa76528e6b42c7818",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "1048787e92bb5c65925833ae76332b98",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "IfcCableCarrierFitting"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "0a0c177be0bf562f98a52e905fe1d89a",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "fe2e919aa01452138ae2372094c59940",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "CABLECARRIERFITTING"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "75d40407b5f155c09f1ec51147abb04a",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "185297c8781e510f9dede05361d43e81",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "IfcBuildingElementProxy"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "57cc47b669e95b41bb9b444964aedbbc",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "64eb2f2c92775ed4b3d0f232d17f76b0",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "NOTDEFINED"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.CreateList, CoreNodeModels",
+      "VariableInputPorts": true,
+      "Id": "31a00eecbe6d5d1bad2af70e332a6ebb",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "0bb6a3f7fe8d5cf6ad7b870f57559d64",
+          "Name": "item0",
+          "Description": "Item Index #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "d9c28d0db5035612bc03361b437b8fc9",
+          "Name": "item1",
+          "Description": "Item Index #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "3543ac5d36ee5a918b090c6758a3d0bc",
+          "Name": "item2",
+          "Description": "Item Index #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "a468518105a840d1a0bee7232439d692",
+          "Name": "item3",
+          "Description": "Item Index #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "646ed2a42ab84824a90f79a2b6ee9d8b",
+          "Name": "item4",
+          "Description": "Item Index #4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "922f072afced472187261fab07cc446b",
+          "Name": "item5",
+          "Description": "Item Index #5",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "50ca8c0a3a745494b6512120de1288d0",
+          "Name": "list",
+          "Description": "A list",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Makes a new list from the given inputs"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.CreateList, CoreNodeModels",
+      "VariableInputPorts": true,
+      "Id": "d7ce280a705a53ce8fd82a0b7c5239a9",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "6b4288db15765cae991b9184d100b702",
+          "Name": "item0",
+          "Description": "Item Index #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "1f18db0743b857a1bce3bea5a85c31ce",
+          "Name": "item1",
+          "Description": "Item Index #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4cefc4864c5d5bc6b2ce6ed42ddd2d60",
+          "Name": "item2",
+          "Description": "Item Index #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "13c14f245c6a4be4ad517d11e9590cc7",
+          "Name": "item3",
+          "Description": "Item Index #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "00916a83bbae44e081103c4f8f9423c0",
+          "Name": "item4",
+          "Description": "Item Index #4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "d8db07714b104d8b8aa096fddf1d932c",
+          "Name": "item5",
+          "Description": "Item Index #5",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "1786a7862b1a5c38b38d390fbce95900",
+          "Name": "list",
+          "Description": "A list",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Makes a new list from the given inputs"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.CreateList, CoreNodeModels",
+      "VariableInputPorts": true,
+      "Id": "ce3c105bf34a5d0f8535755bfe11015d",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "9d6abfd4893d53218eb1647095c10f8d",
+          "Name": "item0",
+          "Description": "Item Index #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2b499aa298d4572f876d60c40307e28d",
+          "Name": "item1",
+          "Description": "Item Index #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "294febaa93e9543780d0fd34d9290505",
+          "Name": "item2",
+          "Description": "Item Index #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f4c6dc9332f744bdb51e1a5bd8f8c401",
+          "Name": "item3",
+          "Description": "Item Index #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "6b2c0cabfb9c4ff2a27037bd56a756c4",
+          "Name": "item4",
+          "Description": "Item Index #4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "75e20cb5542f4c45b9885bcdaf094824",
+          "Name": "item5",
+          "Description": "Item Index #5",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "92a0262a005d586bb0caa5ddd410ca65",
+          "Name": "list",
+          "Description": "A list",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Makes a new list from the given inputs"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "dc86009ee50751839ebdc9561cc23b59",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "2ad58c05fc3259a59d243955b5398dd8",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": true
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "script_path = r\"C:\\Users\\user\\Desktop\\codex\\#ifc_class_standard_by_category\\\\ifc_class_standard_by_category.py\"\nnamespace = {\"IN\": IN}\nwith open(script_path, \"r\", encoding=\"utf-8\") as handle:\n    code = handle.read()\nexec(compile(code, script_path, \"exec\"), namespace)\nOUT = namespace.get(\"OUT\")\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "c1b42191e69e5faaa274f31d6e032e56",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "c181103517a95059a92cf260ce3b3cee",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4a774e829d1155ce9508aee33b527b02",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "e9922f00c1d65381b553fffcba7fb554",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "57b2df6ea8345864995de97cbcbed070",
+          "Name": "IN[3]",
+          "Description": "Input #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "c7bc7c514c5952bc89da056b5bd654b2",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "WatchWidth": 50.0,
+      "WatchHeight": 38.0,
+      "Id": "01df594a6f3d5ebb89019305b5a84580",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "88a52f96509f5290a2fce431c411f82b",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b44e7b3229bb57d58bfe23164b4b5ca0",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualizes a node's output"
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 293,
+      "SelectedString": "OST_LightingFixtures",
+      "Id": "d87c80225a0542d99b56c58f08ce2f8a",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "027a85ae5f8f4986a7f29fb5f5ccaed1",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "30e07f74aeaa4fbda5c3afa4428eec18",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "675fccd2357e494a9f8f269cfe0d42d9",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "IfcLightFixture"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "004354d0f81c47dfa8cbaffa63f76357",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "56e85ac90512461f973f12f7aeafd6fb",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "NOTDEFINED"
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 143,
+      "SelectedString": "OST_Conduit",
+      "Id": "9bd9a664c5864b9e8e37612ce3bed7ab",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "776afc1e074f474eb868befa07bed4d1",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "ecff3f70d19243f9ae3e68a009a572df",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "cefe0d267267414ba1ad504b8867c065",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "IfcCableCarrierSegment"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "26744c53c7e149439267f27a821ab335",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "e8e13c5480d04c82bdd50bf0d73f0275",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "NOTDEFINED"
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 139,
+      "SelectedString": "OST_ConduitFitting",
+      "Id": "6ff8aa407cc34713a5484f8b84d3438f",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "3847cf6e7836499794309a91bba9353d",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "e01fa06e539643dd96a8a4b5d1d11e29",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "0349affec42042c3b83e3c0c7159936e",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "IfcCableCarrierSegment"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "5c3a517a76fb461d9bef3bdf9560221e",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "e804ddf545af4ae583ccf52d5a51aeb9",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "NOTDEFINED"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "7a80d31e443e5a89980e0be1cd92fafb",
+      "End": "0bb6a3f7fe8d5cf6ad7b870f57559d64",
+      "Id": "292dc85ab8bd59fabcce0eaeff7524c9",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "39a2ff0823125c0cb202fc8eb2d4506e",
+      "End": "d9c28d0db5035612bc03361b437b8fc9",
+      "Id": "8e918d14dc2350058469961c37af534e",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "167652c4cd525fabb43d9a2efadca10c",
+      "End": "3543ac5d36ee5a918b090c6758a3d0bc",
+      "Id": "13219255c66b51459a9821b116370fb9",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "9cab7f4a204f573894cc720e60414276",
+      "End": "6b4288db15765cae991b9184d100b702",
+      "Id": "01a507379370566cb9f05172ebad70f1",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "0d54649a16ea5d2fa30f5abded3acad7",
+      "End": "9d6abfd4893d53218eb1647095c10f8d",
+      "Id": "1f6dbbb447e558cca24d365ff651e1b9",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "1048787e92bb5c65925833ae76332b98",
+      "End": "1f18db0743b857a1bce3bea5a85c31ce",
+      "Id": "b4d40a96522f5ef4a105b6c9baffee2f",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "fe2e919aa01452138ae2372094c59940",
+      "End": "2b499aa298d4572f876d60c40307e28d",
+      "Id": "01c061e9ba8b5c1d8e9808af722d3b05",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "185297c8781e510f9dede05361d43e81",
+      "End": "4cefc4864c5d5bc6b2ce6ed42ddd2d60",
+      "Id": "9bd41eb5149f5e74a5c4426754c6b08e",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "64eb2f2c92775ed4b3d0f232d17f76b0",
+      "End": "294febaa93e9543780d0fd34d9290505",
+      "Id": "3a0f0af98965589fbbf901ed74293869",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "56e85ac90512461f973f12f7aeafd6fb",
+      "End": "f4c6dc9332f744bdb51e1a5bd8f8c401",
+      "Id": "a0e89f9df5d14d19b75bfcf3f7ad1421",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "e8e13c5480d04c82bdd50bf0d73f0275",
+      "End": "6b2c0cabfb9c4ff2a27037bd56a756c4",
+      "Id": "2d19164ffbe34c86a5033b86a4ab6b36",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "e804ddf545af4ae583ccf52d5a51aeb9",
+      "End": "75e20cb5542f4c45b9885bcdaf094824",
+      "Id": "28bb888566e4496e9e2f6a2adb8b6e65",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "50ca8c0a3a745494b6512120de1288d0",
+      "End": "c181103517a95059a92cf260ce3b3cee",
+      "Id": "214aadf8eb1d5bed921566598e3a8e92",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "1786a7862b1a5c38b38d390fbce95900",
+      "End": "4a774e829d1155ce9508aee33b527b02",
+      "Id": "cc8a47d8c80b564a9bdea5ff9e0d85c1",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "92a0262a005d586bb0caa5ddd410ca65",
+      "End": "e9922f00c1d65381b553fffcba7fb554",
+      "Id": "26c62e009a4157c197bf844769e98b98",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "2ad58c05fc3259a59d243955b5398dd8",
+      "End": "57b2df6ea8345864995de97cbcbed070",
+      "Id": "a6da583db334500f8bba8ca463cb7ebb",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "c7bc7c514c5952bc89da056b5bd654b2",
+      "End": "88a52f96509f5290a2fce431c411f82b",
+      "Id": "8be5f82c5df05efbbd0ab8b9e5ab5f9b",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "027a85ae5f8f4986a7f29fb5f5ccaed1",
+      "End": "a468518105a840d1a0bee7232439d692",
+      "Id": "ca7f07893d724df889f76ca6bf67952d",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "675fccd2357e494a9f8f269cfe0d42d9",
+      "End": "13c14f245c6a4be4ad517d11e9590cc7",
+      "Id": "1e6b068043254144bfdda3951d8b693b",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "776afc1e074f474eb868befa07bed4d1",
+      "End": "646ed2a42ab84824a90f79a2b6ee9d8b",
+      "Id": "c545c15653554a7ea162fa807c650bf7",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "cefe0d267267414ba1ad504b8867c065",
+      "End": "00916a83bbae44e081103c4f8f9423c0",
+      "Id": "f704cabd72e1403d8599c4eabf57a956",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3847cf6e7836499794309a91bba9353d",
+      "End": "922f072afced472187261fab07cc446b",
+      "Id": "6da19f60baaf4de0a64dff066c5fa053",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "0349affec42042c3b83e3c0c7159936e",
+      "End": "d8db07714b104d8b8aa096fddf1d932c",
+      "Id": "4aac5c0c9eae411bbc85a7a50634ecd2",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.18",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "6.0",
+      "Data": {}
+    }
+  ],
+  "Author": "OpenAI Codex",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.18.1.5096",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 60.0,
+      "LookX": 0.0,
+      "LookY": 0.0,
+      "LookZ": 0.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "218986560e3450b9ae81b9057058aef5",
+        "Name": "Category 1",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -910.404110191268,
+        "Y": 35.848106457178915
+      },
+      {
+        "Id": "e93a197ad25b526389c496b096b3ecda",
+        "Name": "Category 2",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -910.404110191268,
+        "Y": 165.84810645717891
+      },
+      {
+        "Id": "3d92ae6c431854a48aaaa7f99651add0",
+        "Name": "Category 3",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -922.132419957496,
+        "Y": 305.44399626591087
+      },
+      {
+        "Id": "4434d1afb4b85ee4a81d5c80615116f6",
+        "Name": "IFC Class 1",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -630.404110191268,
+        "Y": 15.848106457178915
+      },
+      {
+        "Id": "ec0ef1577ff7500dbe6b09b47fc4af0c",
+        "Name": "IFC Standard 1",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -350.40411019126805,
+        "Y": 15.848106457178915
+      },
+      {
+        "Id": "df9a5fee87d4538aa76528e6b42c7818",
+        "Name": "IFC Class 2",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -630.404110191268,
+        "Y": 145.84810645717891
+      },
+      {
+        "Id": "0a0c177be0bf562f98a52e905fe1d89a",
+        "Name": "IFC Standard 2",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -350.40411019126805,
+        "Y": 145.84810645717891
+      },
+      {
+        "Id": "75d40407b5f155c09f1ec51147abb04a",
+        "Name": "IFC Class 3",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -630.404110191268,
+        "Y": 275.84810645717897
+      },
+      {
+        "Id": "57cc47b669e95b41bb9b444964aedbbc",
+        "Name": "IFC Standard 3",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -350.40411019126805,
+        "Y": 275.84810645717897
+      },
+      {
+        "Id": "31a00eecbe6d5d1bad2af70e332a6ebb",
+        "Name": "Category List",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -17.17761394120123,
+        "Y": -236.88321413033577
+      },
+      {
+        "Id": "d7ce280a705a53ce8fd82a0b7c5239a9",
+        "Name": "IFC Class List",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -8.2664881792782126,
+        "Y": 74.900343690886473
+      },
+      {
+        "Id": "ce3c105bf34a5d0f8535755bfe11015d",
+        "Name": "IFC Standard List",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -24.975064739151094,
+        "Y": 381.57737385250374
+      },
+      {
+        "Id": "dc86009ee50751839ebdc9561cc23b59",
+        "Name": "Include Types",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -30.037776589290729,
+        "Y": 663.28987461027646
+      },
+      {
+        "Id": "c1b42191e69e5faaa274f31d6e032e56",
+        "Name": "Apply IFC Values",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 290.0,
+        "Y": 220.0
+      },
+      {
+        "Id": "01df594a6f3d5ebb89019305b5a84580",
+        "Name": "Result Watch",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 650.0,
+        "Y": 210.0
+      },
+      {
+        "Id": "d87c80225a0542d99b56c58f08ce2f8a",
+        "Name": "Category 4",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -945.40354584177567,
+        "Y": 461.22789091448618
+      },
+      {
+        "Id": "30e07f74aeaa4fbda5c3afa4428eec18",
+        "Name": "IFC Class 3",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -627.019986606848,
+        "Y": 451.88999070196621
+      },
+      {
+        "Id": "004354d0f81c47dfa8cbaffa63f76357",
+        "Name": "IFC Standard 3",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -348.08619658559587,
+        "Y": 432.69821108450236
+      },
+      {
+        "Id": "9bd9a664c5864b9e8e37612ce3bed7ab",
+        "Name": "Category 5",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -939.237870346634,
+        "Y": 599.894716334652
+      },
+      {
+        "Id": "ecff3f70d19243f9ae3e68a009a572df",
+        "Name": "IFC Class 3",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -623.2980007226472,
+        "Y": 599.5170113622496
+      },
+      {
+        "Id": "26744c53c7e149439267f27a821ab335",
+        "Name": "IFC Standard 3",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -349.25158992327749,
+        "Y": 606.39125426149167
+      },
+      {
+        "Id": "6ff8aa407cc34713a5484f8b84d3438f",
+        "Name": "Category 6",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -936.11654356839961,
+        "Y": 758.0063808634759
+      },
+      {
+        "Id": "e01fa06e539643dd96a8a4b5d1d11e29",
+        "Name": "IFC Class 3",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -629.55658962703876,
+        "Y": 751.74825433257422
+      },
+      {
+        "Id": "5c3a517a76fb461d9bef3bdf9560221e",
+        "Name": "IFC Standard 3",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -355.51017882766877,
+        "Y": 758.62249723181628
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "b92455adcabc57ed9f7df6ead39c121b",
+        "Title": "1. Match Each Row",
+        "DescriptionText": "Each category must align with the IFC Class and IFC Standard at the same index. Add more ports in Dynamo if you need more rows.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "218986560e3450b9ae81b9057058aef5",
+          "e93a197ad25b526389c496b096b3ecda",
+          "3d92ae6c431854a48aaaa7f99651add0",
+          "4434d1afb4b85ee4a81d5c80615116f6",
+          "ec0ef1577ff7500dbe6b09b47fc4af0c",
+          "df9a5fee87d4538aa76528e6b42c7818",
+          "0a0c177be0bf562f98a52e905fe1d89a",
+          "75d40407b5f155c09f1ec51147abb04a",
+          "57cc47b669e95b41bb9b444964aedbbc",
+          "d87c80225a0542d99b56c58f08ce2f8a",
+          "30e07f74aeaa4fbda5c3afa4428eec18",
+          "004354d0f81c47dfa8cbaffa63f76357",
+          "9bd9a664c5864b9e8e37612ce3bed7ab",
+          "ecff3f70d19243f9ae3e68a009a572df",
+          "26744c53c7e149439267f27a821ab335",
+          "6ff8aa407cc34713a5484f8b84d3438f",
+          "e01fa06e539643dd96a8a4b5d1d11e29",
+          "5c3a517a76fb461d9bef3bdf9560221e"
+        ],
+        "HasNestedGroups": false,
+        "Left": -955.40354584177567,
+        "Top": -34.151893542821085,
+        "Width": 853.99943565050762,
+        "Height": 924.77439077463737,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 15.848106457178915,
+        "InitialHeight": 425.0,
+        "TextblockHeight": 40.0,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "98ff694dbb3f54849fd12cd1be513f79",
+        "Title": "2. Apply To Model",
+        "DescriptionText": "Run after checking the lists. The graph writes IFC Class to the IFC export parameter and IFC Standard to IFC Predefined Type when those parameters exist.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "31a00eecbe6d5d1bad2af70e332a6ebb",
+          "d7ce280a705a53ce8fd82a0b7c5239a9",
+          "ce3c105bf34a5d0f8535755bfe11015d",
+          "dc86009ee50751839ebdc9561cc23b59",
+          "c1b42191e69e5faaa274f31d6e032e56",
+          "01df594a6f3d5ebb89019305b5a84580"
+        ],
+        "HasNestedGroups": false,
+        "Left": -40.037776589290729,
+        "Top": -286.88321413033577,
+        "Width": 871.03777658929073,
+        "Height": 1082.1730887406122,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -236.88321413033577,
+        "InitialHeight": 525.0,
+        "TextblockHeight": 40.0,
+        "Background": "#FFF2C36B"
+      }
+    ],
+    "X": 210.35981963557566,
+    "Y": 182.85316958454757,
+    "Zoom": 1.4524483253736116
+  }
+}

@@ -1,0 +1,429 @@
+{
+  "Uuid": "7f6c8f94-2d6a-4b36-8d4b-09f6a6f0b7c1",
+  "IsCustomNode": false,
+  "Description": "Select one or more DWG/Revit/Revit Link faces and move the selected objects in Z so each object follows the best matching picked face at its XY.",
+  "Name": "추출@player_selected_face_extract_model_lines",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "380d4898a97c4ac9b67714a09fcdc288",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "1d1ca3a7995a4580974c9be8d42e9d34",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": true
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import io\n\nscript_path = r\"C:\\Users\\user\\Desktop\\codex\\#객체 토목에 밀착#\\@selected_multi_face_z_attach.py\"\nwith io.open(script_path, \"r\", encoding=\"utf-8\") as script_file:\n    script = script_file.read()\nnamespace = {\"IN\": IN}\nexec(compile(script, script_path, \"exec\"), namespace)\nOUT = namespace.get(\"OUT\")",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "ef854888530c41c5b34234720a00ba6f",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "86648858d30946ccae425696d59225a0",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2ca714f8d6794d5f8f8396eb4c8613e1",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "8a2c8581fd0d4ee38ed9c8646034f35c",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4ff1f8b9d4b3400cb40e8a5b6e24a1d2",
+          "Name": "IN[3]",
+          "Description": "Input #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "68fdfed4dd6e41fdaa91fa2dc4c4cf0b",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+      "NumberType": "Double",
+      "Id": "f4b5c8d97a3e4c7d8e9f1029384756ab",
+      "NodeType": "NumberInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "3a1d6f0b8f944f7d9eb7e1b0ff28d872",
+          "Name": "",
+          "Description": "Double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a number",
+      "InputValue": 20000.0
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+      "NumberType": "Double",
+      "Id": "f1c4e6814e3b403e89e481a6d52a575a",
+      "NodeType": "NumberInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "cf0b71a968124041852cc7e8b967f403",
+          "Name": "",
+          "Description": "Double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a number",
+      "InputValue": 8000.0
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "7a3634c846e34d56b6c9d8d3537da7a9",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "1b6cbd7de7ad4a40986641e032ea8a98",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": true
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "WatchWidth": 50.0,
+      "WatchHeight": 38.0,
+      "Id": "6e9c2e8476584a2daa2f13b8c83c8ca1",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "773afac5adeb403ba8a9035961f70918",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "ae78b06feb6a48c7b372644a2014564b",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualizes a node's output"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "WatchWidth": 482.0,
+      "WatchHeight": 460.0,
+      "Id": "68fc0c118ebb4294a4208d70584f0200",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "e0b6223ccb8d4d848fe11b344f93b83a",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "daae16ef6fc74d8f987119cb0d2d8117",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualizes a node's output"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "1d1ca3a7995a4580974c9be8d42e9d34",
+      "End": "86648858d30946ccae425696d59225a0",
+      "Id": "9c84943bef9e47c692cd5a1f24ef456c",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "68fdfed4dd6e41fdaa91fa2dc4c4cf0b",
+      "End": "773afac5adeb403ba8a9035961f70918",
+      "Id": "18dcad9513b74d9e94472651a0a70de2",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "68fdfed4dd6e41fdaa91fa2dc4c4cf0b",
+      "End": "e0b6223ccb8d4d848fe11b344f93b83a",
+      "Id": "68f6b0ad872a40bdbdaf2ca403729787",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "3a1d6f0b8f944f7d9eb7e1b0ff28d872",
+      "End": "2ca714f8d6794d5f8f8396eb4c8613e1",
+      "Id": "2e1a4f1d8f974f9dbb8a50f25c30c603",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "cf0b71a968124041852cc7e8b967f403",
+      "End": "8a2c8581fd0d4ee38ed9c8646034f35c",
+      "Id": "ab7e6f2e23db4628ad880f77bb0ab9b0",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "1b6cbd7de7ad4a40986641e032ea8a98",
+      "End": "4ff1f8b9d4b3400cb40e8a5b6e24a1d2",
+      "Id": "b3d9299a8cec43bc8b1abdf8d94c1792",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.18",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "6.0",
+      "Data": {}
+    }
+  ],
+  "Author": "OpenAI Codex",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.18.1.5096",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 60.0,
+      "LookX": 0.0,
+      "LookY": 0.0,
+      "LookZ": 0.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "380d4898a97c4ac9b67714a09fcdc288",
+        "Name": "재실행 버튼",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -477.59334823889992,
+        "Y": 286.315190045974
+      },
+      {
+        "Id": "ef854888530c41c5b34234720a00ba6f",
+        "Name": "Selected Multi Face Z Attach Python",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -99.683835005105834,
+        "Y": 65.672434998517645
+      },
+      {
+        "Id": "f4b5c8d97a3e4c7d8e9f1029384756ab",
+        "Name": "연결 Y 길이(mm)",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -470.0,
+        "Y": -8.0
+      },
+      {
+        "Id": "f1c4e6814e3b403e89e481a6d52a575a",
+        "Name": "객체 검색 반경(mm)",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -470.0,
+        "Y": 42.0
+      },
+      {
+        "Id": "7a3634c846e34d56b6c9d8d3537da7a9",
+        "Name": "추출 모드",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -470.0,
+        "Y": 92.0
+      },
+      {
+        "Id": "6e9c2e8476584a2daa2f13b8c83c8ca1",
+        "Name": "Watch",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 327.68669371157955,
+        "Y": 57.45385426184464
+      },
+      {
+        "Id": "68fc0c118ebb4294a4208d70584f0200",
+        "Name": "Watch",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 483.02693713795026,
+        "Y": 242.7970631058906
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "83184e134b264973b778c955178e7954",
+        "Title": "1. Select Objects And Pick Faces",
+        "DescriptionText": "Select one or more objects first. Run the graph, then pick one or more Revit faces, DWG faces, or Revit Link faces. Each object keeps its XY and reads the best matching picked face Z at that XY.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "380d4898a97c4ac9b67714a09fcdc288",
+          "ef854888530c41c5b34234720a00ba6f",
+          "f4b5c8d97a3e4c7d8e9f1029384756ab",
+          "f1c4e6814e3b403e89e481a6d52a575a",
+          "7a3634c846e34d56b6c9d8d3537da7a9"
+        ],
+        "HasNestedGroups": false,
+        "Left": -487.59334823889992,
+        "Top": -67.0,
+        "Width": 786.90951323379409,
+        "Height": 485.315190045974,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -8.0,
+        "InitialHeight": 317.0,
+        "TextblockHeight": 49.0,
+        "Background": "#FFD2E6C9"
+      },
+      {
+        "Id": "5e5fbef632734e9a910b98f83a6c5fa0",
+        "Title": "2. Review Result",
+        "DescriptionText": "Check movedIds, moveDetails, skipped, selectedFaceSummary, and selectedFaceSummaries here after the run.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "6e9c2e8476584a2daa2f13b8c83c8ca1"
+        ],
+        "HasNestedGroups": false,
+        "Left": 317.68669371157955,
+        "Top": -44.54614573815536,
+        "Width": 147.0,
+        "Height": 238.0,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 57.45385426184464,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 92.0,
+        "Background": "#FFF2D38B"
+      }
+    ],
+    "X": -260.1533848558521,
+    "Y": -102.57015428679432,
+    "Zoom": 0.92237999733324827
+  }
+}

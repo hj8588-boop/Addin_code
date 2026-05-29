@@ -1,0 +1,334 @@
+{
+  "Uuid": "8c929c7b-bd47-4c50-9582-a7d00d1c77d9",
+  "IsCustomNode": false,
+  "Description": "Clear selected Revit parameter values from picked elements using a parameter picker.",
+  "Name": "객체_속성정보_삭제",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "c6b846f9c70e46d5a5fce6187af4d101",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "0ba0f319034148b0b4acaf7f03e7c001",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": ""
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "4c184cbf305d4799ba85c319c0065102",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "4ad267d0682d42da8e472b390d7be002",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": true
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "a53de3d5d47845b9ad0b88577197d103",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "1aa628f77ab24c43983768655c4f8003",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": false
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "script_path = r\"C:\\Users\\user\\Desktop\\codex\\#속성정보 삭제\\clear_parameter_values.py\"\\nnamespace = {\"IN\": IN}\\nwith open(script_path, \"r\", encoding=\"utf-8\") as handle:\\n    code = handle.read()\\nexec(compile(code, script_path, \"exec\"), namespace)\\nOUT = namespace.get(\"OUT\")\\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "8e4a540d914b4e7882f9218e66b9b104",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "43359b1fd8ca4b4fa77c7eb57f52a004",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "1107220bbbe44d77ae2cb8587af23005",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "40847d91e21d46ffbc6f1abf56df5006",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "969fc9e5e95d484699f16b7326899007",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "WatchWidth": 340.0,
+      "WatchHeight": 220.0,
+      "Id": "9f55436efb864e2bb3d40705b2e4e105",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "7d0c8eeef94e4a76ab99a8fe1b3f8008",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "9f5b2919ff4b4230bf54648d48b63009",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualizes a node's output"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "0ba0f319034148b0b4acaf7f03e7c001",
+      "End": "43359b1fd8ca4b4fa77c7eb57f52a004",
+      "Id": "1fcb2af3e4d34b44abf4c98dab130101",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "4ad267d0682d42da8e472b390d7be002",
+      "End": "1107220bbbe44d77ae2cb8587af23005",
+      "Id": "3290a5349f0f4063b9bc3be5f6410102",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "1aa628f77ab24c43983768655c4f8003",
+      "End": "40847d91e21d46ffbc6f1abf56df5006",
+      "Id": "94f3c03b04f24711ab6ad0dfa1cd0103",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "969fc9e5e95d484699f16b7326899007",
+      "End": "7d0c8eeef94e4a76ab99a8fe1b3f8008",
+      "Id": "c8b963d13d0b4ceab41b5ad9f4f70104",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Thumbnail": "",
+  "GraphDocumentationURL": "",
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.18",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "6.0",
+      "Data": {}
+    }
+  ],
+  "Author": "OpenAI Codex",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.18.1.5096",
+      "RunType": "Manual",
+      "RunPeriod": "1000",
+      "HasRun": false
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 60.0,
+      "LookX": 0.0,
+      "LookY": 0.0,
+      "LookZ": 0.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "NodeViews": [
+      {
+        "Id": "c6b846f9c70e46d5a5fce6187af4d101",
+        "Name": "Filter Text",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -660.0,
+        "Y": 110.0
+      },
+      {
+        "Id": "4c184cbf305d4799ba85c319c0065102",
+        "Name": "Repick Selection",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -660.0,
+        "Y": 250.0
+      },
+      {
+        "Id": "a53de3d5d47845b9ad0b88577197d103",
+        "Name": "Execute",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -660.0,
+        "Y": 390.0
+      },
+      {
+        "Id": "8e4a540d914b4e7882f9218e66b9b104",
+        "Name": "Clear Parameter Values",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -170.0,
+        "Y": 230.0
+      },
+      {
+        "Id": "9f55436efb864e2bb3d40705b2e4e105",
+        "Name": "Result Watch",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 260.0,
+        "Y": 200.0
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "9984fc226fc2491d8f5c2bf45c420111",
+        "Title": "1. Input",
+        "DescriptionText": "Filter Text는 선택창에서 파라미터 목록을 좁혀볼 때만 씁니다. Repick Selection이 true면 실행할 때마다 객체를 다시 선택하고, 그 객체에 실제로 들어있는 파라미터 이름만 선택창에 표시됩니다.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "c6b846f9c70e46d5a5fce6187af4d101",
+          "4c184cbf305d4799ba85c319c0065102",
+          "a53de3d5d47845b9ad0b88577197d103"
+        ],
+        "HasNestedGroups": false,
+        "Left": -690.0,
+        "Top": 70.0,
+        "Width": 340.0,
+        "Height": 420.0,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 110.0,
+        "InitialHeight": 300.0,
+        "TextblockHeight": 40.0,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "5fe4e2e9117e45f4ac6c7dbec7aa0112",
+        "Title": "2. Run",
+        "DescriptionText": "실행하면 파라미터 선택창이 먼저 열립니다. 선택 후 Execute가 true이면 해당 값들을 비우고, false이면 선택만 저장합니다. 문자열은 공백, 숫자는 0, ElementId는 비연결 상태로 초기화됩니다.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "8e4a540d914b4e7882f9218e66b9b104",
+          "9f55436efb864e2bb3d40705b2e4e105"
+        ],
+        "HasNestedGroups": false,
+        "Left": -210.0,
+        "Top": 150.0,
+        "Width": 860.0,
+        "Height": 350.0,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 190.0,
+        "InitialHeight": 220.0,
+        "TextblockHeight": 40.0,
+        "Background": "#FFF2C36B"
+      }
+    ],
+    "X": 152.0,
+    "Y": 148.0,
+    "Zoom": 1.0
+  }
+}

@@ -1,0 +1,605 @@
+{
+  "Uuid": "1a5b3b17-5198-4e5c-9ef1-8b9dd8e8dcf1",
+  "IsCustomNode": false,
+  "Description": "Export Revit shared parameter values for selected categories to Excel.",
+  "Name": "SharedParameterValues_Export",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "8d14e4bd6a4b4c48a1e17f0e6d49dbb1",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "de44383d43a24a8d8abcf73f0b6cb806",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "C:\\Users\\user\\Desktop\\codex\\다이나모\\"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "2f0bdb5d3ce54a18a98c3c433f79355b",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "7951be1d0eff43e7a2c5cda340213204",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "SharedParameters"
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 208,
+      "SelectedString": "OST_ElectricalEquipment",
+      "Id": "729d18a78dcf44db80bf17f57d57f959",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "7fb80a8b967a4a3d8de5e6d1d6833102",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.CreateList, CoreNodeModels",
+      "VariableInputPorts": true,
+      "Id": "a12f3f4e8b2f470ab4df77ee72d6a641",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "5fbdd95a16164cf88077a9e62f6643f8",
+          "Name": "item0",
+          "Description": "Item Index #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "025a0db6336c46bdb26c3ed38d53564f",
+          "Name": "item1",
+          "Description": "Item Index #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "666412350635429e89329f594a85749f",
+          "Name": "item2",
+          "Description": "Item Index #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "99ec45ae301343ce9aa5dd3d81857b73",
+          "Name": "item3",
+          "Description": "Item Index #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "65bf5fed00db45b29bfb14ffdc2609db",
+          "Name": "item4",
+          "Description": "Item Index #4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b29357bf7b084272bebca08b1a8f302a",
+          "Name": "list",
+          "Description": "A list.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Makes a new list from the given inputs"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "d3879e2bbf4f44e0b63fcb1e8d88b450",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "16840f0f16af47a6a79187ae1bc9992f",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": ""
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "script_path = r\"C:\\Users\\user\\Desktop\\codex\\#SharedParameterValues_Export\\shared_parameter_values_export.py\"\nnamespace = {\"IN\": IN}\nwith open(script_path, \"r\", encoding=\"utf-8\") as handle:\n    code = handle.read()\nexec(compile(code, script_path, \"exec\"), namespace)\nOUT = namespace.get(\"OUT\")\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "dbb831cc04c443a1a58249da1474df0d",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "278b8a20c1b54daea0eb89600c9307f5",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "69fd766f899d41588ade9c0572c0ff38",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "3dea9eb5965740858ea7bc066ada0a7a",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "69f47b08a93e4b4fa212de93d9d12756",
+          "Name": "IN[3]",
+          "Description": "Input #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "a019d08bf083414692ba24bde52ae271",
+          "Name": "IN[4]",
+          "Description": "Input #4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "75212c87c5af438ea9517e4366dba564",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "2ff8b05b10c448e18854e98de1000431",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "db215b82584b4dc88fc967e9ebc89f33",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": true
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 104,
+      "SelectedString": "OST_CableTrayFitting",
+      "Id": "4f8b51c335b1405c829e4589392b6354",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "0ecbdc77db2e49f0b2865ab5623192e6",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 108,
+      "SelectedString": "OST_CableTray",
+      "Id": "e6753e6148464f7fa7cdb81b5b0e952b",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "ed77e82e8708402482c4c599a41277b3",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 293,
+      "SelectedString": "OST_LightingFixtures",
+      "Id": "31e6b02e9c5e423b8dff4de8df7d9a9d",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "2eaf89ac62dc460886be934c63601a0c",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 212,
+      "SelectedString": "OST_ElectricalFixtures",
+      "Id": "270d26fe978d481e9cf25103457e0c36",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "a040b35f91894081b53a1d8792aac8e9",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "de44383d43a24a8d8abcf73f0b6cb806",
+      "End": "278b8a20c1b54daea0eb89600c9307f5",
+      "Id": "34f74d3ebc184f4ca5d097d3c7556414",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "7951be1d0eff43e7a2c5cda340213204",
+      "End": "69fd766f899d41588ade9c0572c0ff38",
+      "Id": "7c8f682cb45a4dba8060772e31e7f792",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "7fb80a8b967a4a3d8de5e6d1d6833102",
+      "End": "5fbdd95a16164cf88077a9e62f6643f8",
+      "Id": "801611e6178948fd92bd3346fd552a32",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "b29357bf7b084272bebca08b1a8f302a",
+      "End": "69f47b08a93e4b4fa212de93d9d12756",
+      "Id": "84ef05b3d6554471a5c06d0d711939b0",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "16840f0f16af47a6a79187ae1bc9992f",
+      "End": "3dea9eb5965740858ea7bc066ada0a7a",
+      "Id": "8fe4d4a1ef2b490abf6b6d124f58538a",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "db215b82584b4dc88fc967e9ebc89f33",
+      "End": "a019d08bf083414692ba24bde52ae271",
+      "Id": "05c923b40f7a4344b9c1097b86598162",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "0ecbdc77db2e49f0b2865ab5623192e6",
+      "End": "666412350635429e89329f594a85749f",
+      "Id": "201c44e398b349d19a63a853d4c0b591",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "ed77e82e8708402482c4c599a41277b3",
+      "End": "99ec45ae301343ce9aa5dd3d81857b73",
+      "Id": "a1cbde95231249fe8901105839ea4915",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "2eaf89ac62dc460886be934c63601a0c",
+      "End": "025a0db6336c46bdb26c3ed38d53564f",
+      "Id": "095f7a54de754a59b9ce4c66b884c30e",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "a040b35f91894081b53a1d8792aac8e9",
+      "End": "65bf5fed00db45b29bfb14ffdc2609db",
+      "Id": "a40622ac7ea94d3b83bcc91ca61ef78e",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.18",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "6.0",
+      "Data": {}
+    }
+  ],
+  "Author": "OpenAI Codex",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.18.1.5096",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 60.0,
+      "LookX": 0.0,
+      "LookY": 0.0,
+      "LookZ": 0.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "8d14e4bd6a4b4c48a1e17f0e6d49dbb1",
+        "Name": "Folder Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -117.09196606405823,
+        "Y": -15.579825500157767
+      },
+      {
+        "Id": "2f0bdb5d3ce54a18a98c3c433f79355b",
+        "Name": "String",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -51.551514292521517,
+        "Y": 156.28667862133176
+      },
+      {
+        "Id": "729d18a78dcf44db80bf17f57d57f959",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -313.74122429044252,
+        "Y": 410.46318452450475
+      },
+      {
+        "Id": "a12f3f4e8b2f470ab4df77ee72d6a641",
+        "Name": "List.Create",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 78.8095655081404,
+        "Y": 453.1728696071317
+      },
+      {
+        "Id": "d3879e2bbf4f44e0b63fcb1e8d88b450",
+        "Name": "추출할 공유 파라미터",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 8.9972244033422157,
+        "Y": 283.850258099064
+      },
+      {
+        "Id": "dbb831cc04c443a1a58249da1474df0d",
+        "Name": "Python Script",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": false,
+        "X": 430.61295537533977,
+        "Y": 156.62999176346298
+      },
+      {
+        "Id": "2ff8b05b10c448e18854e98de1000431",
+        "Name": "Boolean",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 297.6773712224836,
+        "Y": 669.08749401862826
+      },
+      {
+        "Id": "4f8b51c335b1405c829e4589392b6354",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -317.45397686906841,
+        "Y": 670.07233187082215
+      },
+      {
+        "Id": "e6753e6148464f7fa7cdb81b5b0e952b",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -321.47987817714551,
+        "Y": 802.79896831649694
+      },
+      {
+        "Id": "31e6b02e9c5e423b8dff4de8df7d9a9d",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -313.81752839515838,
+        "Y": 542.80036813601237
+      },
+      {
+        "Id": "270d26fe978d481e9cf25103457e0c36",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -318.33555455670069,
+        "Y": 931.11025061992768
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "43dc3a96c3b24de4a33669a445947a65",
+        "Title": "Export To Excel",
+        "DescriptionText": "",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "dbb831cc04c443a1a58249da1474df0d"
+        ],
+        "HasNestedGroups": false,
+        "Left": 420.61295537533977,
+        "Top": 106.62999176346298,
+        "Width": 194.0,
+        "Height": 329.0,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 156.62999176346298,
+        "InitialHeight": 144.99999999999997,
+        "TextblockHeight": 40.0,
+        "Background": "#FF9FD0CB"
+      },
+      {
+        "Id": "b92060cfcef0445ab98eb636a60de9cc",
+        "Title": "파일 생성할 폴더 경로 입력",
+        "DescriptionText": "",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "8d14e4bd6a4b4c48a1e17f0e6d49dbb1"
+        ],
+        "HasNestedGroups": false,
+        "Left": -127.09196606405823,
+        "Top": -103.57982550015777,
+        "Width": 253.0,
+        "Height": 239.0,
+        "FontSize": 24.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -15.579825500157767,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 78.0,
+        "Background": "#FFC1D676"
+      }
+    ],
+    "X": 381.81410937790753,
+    "Y": -217.12083641369094,
+    "Zoom": 0.71936489251559432
+  }
+}

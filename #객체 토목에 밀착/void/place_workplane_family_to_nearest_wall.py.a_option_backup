@@ -1,0 +1,613 @@
+import clr
+
+clr.AddReference("RevitAPI")
+from Autodesk.Revit.DB import (
+    FamilyInstance,
+    FamilyPlacementType,
+    FilteredElementCollector,
+    Floor,
+    HostObjectUtils,
+    LocationPoint,
+    RevitLinkInstance,
+    ShellLayerType,
+    SubTransaction,
+    UnitUtils,
+    Wall,
+    XYZ,
+)
+
+clr.AddReference("RevitServices")
+from RevitServices.Persistence import DocumentManager
+from RevitServices.Transactions import TransactionManager
+
+doc = DocumentManager.Instance.CurrentDBDocument
+uiapp = DocumentManager.Instance.CurrentUIApplication
+uidoc = uiapp.ActiveUIDocument if uiapp else None
+
+# Dynamo 입력값
+# IN[0]: 최대 탐색 거리(mm)
+# IN[1]: 원본 패밀리 삭제 여부
+max_distance_mm = IN[0] if len(IN) > 0 else 3000
+delete_sources = IN[1] if len(IN) > 1 else False
+
+
+def to_bool(value):
+    """Dynamo에서 들어오는 여러 형식의 값을 True/False로 정리합니다."""
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    return str(value).strip().lower() in ["true", "1", "yes", "y"]
+
+
+def to_float(value, default_value):
+    """숫자 변환에 실패하면 기본값으로 되돌립니다."""
+    try:
+        return float(value)
+    except Exception:
+        return default_value
+
+
+def to_internal_mm(value_in_mm):
+    """Revit 내부 단위(feet)로 변환합니다."""
+    try:
+        from Autodesk.Revit.DB import UnitTypeId
+
+        return UnitUtils.ConvertToInternalUnits(value_in_mm, UnitTypeId.Millimeters)
+    except Exception:
+        from Autodesk.Revit.DB import DisplayUnitType
+
+        return UnitUtils.ConvertToInternalUnits(value_in_mm, DisplayUnitType.DUT_MILLIMETERS)
+
+
+def from_internal_mm(value_in_internal_units):
+    """Revit 내부 단위를 mm로 다시 바꿔서 Watch에서 읽기 쉽게 만듭니다."""
+    try:
+        from Autodesk.Revit.DB import UnitTypeId
+
+        return UnitUtils.ConvertFromInternalUnits(value_in_internal_units, UnitTypeId.Millimeters)
+    except Exception:
+        from Autodesk.Revit.DB import DisplayUnitType
+
+        return UnitUtils.ConvertFromInternalUnits(value_in_internal_units, DisplayUnitType.DUT_MILLIMETERS)
+
+
+def normalize_xyz(vector):
+    """길이가 0에 가까운 벡터는 버리고, 유효하면 단위 벡터로 만듭니다."""
+    if vector is None:
+        return None
+    length = vector.GetLength()
+    if length < 1e-9:
+        return None
+    return vector.Normalize()
+
+
+def safe_int_id(element):
+    """요소가 없거나 Id를 읽지 못해도 스크립트가 멈추지 않게 합니다."""
+    try:
+        return element.Id.IntegerValue
+    except Exception:
+        return None
+
+
+def get_symbol_label(symbol):
+    """Watch에서 읽기 쉽도록 Family / Type 이름을 합칩니다."""
+    try:
+        family_name = symbol.Family.Name
+    except Exception:
+        family_name = "UnknownFamily"
+
+    try:
+        type_name = symbol.Name
+    except Exception:
+        type_name = "UnknownType"
+
+    return "{0} : {1}".format(family_name, type_name)
+
+
+def get_link_transform(link_instance):
+    """링크 모델 좌표를 현재 모델 좌표로 바꾸는 변환을 가져옵니다."""
+    if link_instance is None:
+        return None
+
+    try:
+        return link_instance.GetTotalTransform()
+    except Exception:
+        try:
+            return link_instance.GetTransform()
+        except Exception:
+            return None
+
+
+def get_selected_family_instances():
+    """현재 Revit 선택에서 FamilyInstance만 추립니다."""
+    if uidoc is None:
+        return []
+
+    selected_ids = list(uidoc.Selection.GetElementIds())
+    instances = []
+
+    for element_id in selected_ids:
+        element = doc.GetElement(element_id)
+        if isinstance(element, FamilyInstance):
+            instances.append(element)
+
+    return instances
+
+
+def is_workplane_based(instance):
+    """이번 스크립트는 work-plane based 패밀리만 대상으로 합니다."""
+    try:
+        return instance.Symbol.Family.FamilyPlacementType == FamilyPlacementType.WorkPlaneBased
+    except Exception:
+        return False
+
+
+def get_instance_point(instance):
+    """
+    소스 패밀리의 기준점을 읽습니다.
+    LocationPoint가 없는 패밀리는 현재 로직으로는 지원하지 않습니다.
+    """
+    location = instance.Location
+    if isinstance(location, LocationPoint):
+        return location.Point
+    return None
+
+
+def make_face_candidate(host_element, face_reference, face, host_kind, source_kind, link_instance=None):
+    """
+    벽/바닥/링크 여부와 상관없이 같은 형식의 후보 데이터로 통일합니다.
+    이렇게 해두면 '최근접 면 찾기' 로직을 하나로 유지할 수 있습니다.
+    """
+    transform = get_link_transform(link_instance)
+
+    if link_instance is None:
+        host_reference = face_reference
+    else:
+        try:
+            host_reference = face_reference.CreateLinkReference(link_instance)
+        except Exception:
+            return None
+
+    return {
+        "hostElement": host_element,
+        "reference": host_reference,
+        "face": face,
+        "hostKind": host_kind,
+        "sourceKind": source_kind,
+        "linkInstance": link_instance,
+        "transform": transform,
+    }
+
+
+def append_wall_face_candidates(host_doc, wall, source_kind, candidates, link_instance=None):
+    """벽의 외측/내측 면을 후보로 추가합니다."""
+    side_references = []
+
+    for layer_type in [ShellLayerType.Exterior, ShellLayerType.Interior]:
+        try:
+            side_references.extend(list(HostObjectUtils.GetSideFaces(wall, layer_type)))
+        except Exception:
+            continue
+
+    for face_reference in side_references:
+        try:
+            face = wall.GetGeometryObjectFromReference(face_reference)
+        except Exception:
+            face = None
+
+        if face is None:
+            continue
+
+        candidate = make_face_candidate(
+            wall,
+            face_reference,
+            face,
+            "wall",
+            source_kind,
+            link_instance,
+        )
+
+        if candidate is not None:
+            candidates.append(candidate)
+
+
+def append_floor_face_candidates(host_doc, floor, source_kind, candidates, link_instance=None):
+    """
+    바닥은 상부면(top face)만 후보에 넣습니다.
+    '바닥에 밀착'이라는 요구와 가장 잘 맞는 면이기 때문입니다.
+    """
+    try:
+        top_references = list(HostObjectUtils.GetTopFaces(floor))
+    except Exception:
+        top_references = []
+
+    for face_reference in top_references:
+        try:
+            face = floor.GetGeometryObjectFromReference(face_reference)
+        except Exception:
+            face = None
+
+        if face is None:
+            continue
+
+        candidate = make_face_candidate(
+            floor,
+            face_reference,
+            face,
+            "floor",
+            source_kind,
+            link_instance,
+        )
+
+        if candidate is not None:
+            candidates.append(candidate)
+
+
+def get_current_model_face_candidates():
+    """현재 모델 안의 벽/바닥 면을 후보로 수집합니다."""
+    candidates = []
+
+    for wall in FilteredElementCollector(doc).OfClass(Wall).WhereElementIsNotElementType():
+        append_wall_face_candidates(doc, wall, "currentModel", candidates)
+
+    for floor in FilteredElementCollector(doc).OfClass(Floor).WhereElementIsNotElementType():
+        append_floor_face_candidates(doc, floor, "currentModel", candidates)
+
+    return candidates
+
+
+def get_linked_model_face_candidates():
+    """
+    링크된 Revit 모델의 벽/바닥도 후보로 수집합니다.
+
+    중요한 점:
+    - Revit 링크(.rvt) 안의 Wall/Floor는 지원합니다.
+    - CAD 링크(DWG/ImportInstance)의 면 호스팅은 이번 코드에서 지원하지 않습니다.
+    """
+    candidates = []
+
+    link_instances = FilteredElementCollector(doc).OfClass(RevitLinkInstance).WhereElementIsNotElementType()
+
+    for link_instance in link_instances:
+        link_doc = None
+        try:
+            link_doc = link_instance.GetLinkDocument()
+        except Exception:
+            link_doc = None
+
+        if link_doc is None:
+            continue
+
+        for wall in FilteredElementCollector(link_doc).OfClass(Wall).WhereElementIsNotElementType():
+            append_wall_face_candidates(link_doc, wall, "linkedModel", candidates, link_instance)
+
+        for floor in FilteredElementCollector(link_doc).OfClass(Floor).WhereElementIsNotElementType():
+            append_floor_face_candidates(link_doc, floor, "linkedModel", candidates, link_instance)
+
+    return candidates
+
+
+def is_face_orientation_acceptable(host_kind, normal):
+    """
+    어떤 면을 허용할지 정합니다.
+    - wall: 거의 수직인 면
+    - floor: 거의 수평인 면
+    """
+    if normal is None:
+        return False
+
+    if host_kind == "wall":
+        return abs(normal.Z) <= 0.25
+
+    if host_kind == "floor":
+        return abs(normal.Z) >= 0.75
+
+    return False
+
+
+def convert_host_point_to_candidate_space(point, candidate):
+    """링크 모델 후보면, 현재 모델 좌표를 링크 좌표로 바꿔서 투영 계산에 사용합니다."""
+    transform = candidate["transform"]
+    if transform is None:
+        return point
+
+    try:
+        inverse = transform.Inverse
+        return inverse.OfPoint(point)
+    except Exception:
+        return None
+
+
+def convert_candidate_point_to_host_space(point, candidate):
+    """후보 면 위에서 찾은 좌표를 현재 모델 좌표로 다시 바꿉니다."""
+    transform = candidate["transform"]
+    if transform is None:
+        return point
+
+    try:
+        return transform.OfPoint(point)
+    except Exception:
+        return None
+
+
+def convert_candidate_vector_to_host_space(vector, candidate):
+    """링크 모델의 법선 벡터를 현재 모델 기준 벡터로 바꿉니다."""
+    transform = candidate["transform"]
+    if transform is None:
+        return vector
+
+    try:
+        return transform.OfVector(vector)
+    except Exception:
+        return None
+
+
+def find_nearest_face(point, candidates, max_distance_internal):
+    """
+    모든 후보 면 중에서 가장 가까운 면을 찾습니다.
+    벽/바닥/링크 여부는 후보 데이터에 담아두고,
+    여기서는 '거리'와 '면 방향'만 기준으로 고릅니다.
+    """
+    best_match = None
+    best_distance = None
+
+    for candidate in candidates:
+        face = candidate["face"]
+        candidate_point = convert_host_point_to_candidate_space(point, candidate)
+        if candidate_point is None:
+            continue
+
+        try:
+            projection = face.Project(candidate_point)
+        except Exception:
+            projection = None
+
+        if projection is None:
+            continue
+
+        projected_point_host = convert_candidate_point_to_host_space(projection.XYZPoint, candidate)
+        if projected_point_host is None:
+            continue
+
+        distance = point.DistanceTo(projected_point_host)
+        if max_distance_internal > 0 and distance > max_distance_internal:
+            continue
+
+        try:
+            local_normal = face.ComputeNormal(projection.UVPoint)
+        except Exception:
+            local_normal = None
+
+        normal = normalize_xyz(convert_candidate_vector_to_host_space(local_normal, candidate))
+        if not is_face_orientation_acceptable(candidate["hostKind"], normal):
+            continue
+
+        if best_distance is None or distance < best_distance:
+            best_distance = distance
+            best_match = {
+                "hostElement": candidate["hostElement"],
+                "reference": candidate["reference"],
+                "point": projected_point_host,
+                "normal": normal,
+                "distance": distance,
+                "hostKind": candidate["hostKind"],
+                "sourceKind": candidate["sourceKind"],
+                "linkInstance": candidate["linkInstance"],
+            }
+
+    return best_match
+
+
+def get_reference_direction(instance, face_normal):
+    """
+    패밀리를 면 위에 둘 때 회전 기준이 되는 방향 벡터를 만듭니다.
+    먼저 기존 패밀리 방향을 최대한 재활용하고,
+    불가능하면 기본 축(X/Y/Z) 중 적절한 방향을 사용합니다.
+    """
+    candidates = []
+
+    try:
+        candidates.append(instance.HandOrientation)
+    except Exception:
+        pass
+
+    try:
+        candidates.append(instance.FacingOrientation)
+    except Exception:
+        pass
+
+    candidates.extend([XYZ.BasisZ, XYZ.BasisX, XYZ.BasisY])
+
+    for vector in candidates:
+        normalized = normalize_xyz(vector)
+        if normalized is None:
+            continue
+
+        projected = normalized - face_normal.Multiply(normalized.DotProduct(face_normal))
+        projected = normalize_xyz(projected)
+        if projected is not None:
+            return projected
+
+    return XYZ.BasisX
+
+
+def ensure_symbol_active(symbol):
+    """비활성 타입이면 먼저 활성화해야 배치가 됩니다."""
+    if symbol is not None and not symbol.IsActive:
+        symbol.Activate()
+        doc.Regenerate()
+
+
+def make_result(**kwargs):
+    """OUT 형식을 한곳에서 통일합니다."""
+    result = {
+        "selectedCount": 0,
+        "validSourceCount": 0,
+        "invalidSourceIds": [],
+        "maxDistanceMm": 0.0,
+        "deleteSources": False,
+        "createdIds": [],
+        "deletedIds": [],
+        "skipped": [],
+        "unhandledError": None,
+        "message": None,
+        "candidateSummary": {},
+    }
+    result.update(kwargs)
+    return result
+
+
+def main():
+    selected_instances = get_selected_family_instances()
+    max_distance_value = max(0.0, to_float(max_distance_mm, 3000.0))
+    max_distance_internal = to_internal_mm(max_distance_value)
+    delete_sources_value = to_bool(delete_sources)
+
+    if not selected_instances:
+        return make_result(
+            selectedCount=0,
+            validSourceCount=0,
+            maxDistanceMm=max_distance_value,
+            deleteSources=delete_sources_value,
+            message="Revit에서 source family instance를 먼저 선택한 뒤 Dynamo를 실행하세요.",
+        )
+
+    invalid_instances = []
+    valid_instances = []
+
+    for instance in selected_instances:
+        if not is_workplane_based(instance):
+            invalid_instances.append(instance.Id.IntegerValue)
+            continue
+
+        if get_instance_point(instance) is None:
+            invalid_instances.append(instance.Id.IntegerValue)
+            continue
+
+        valid_instances.append(instance)
+
+    if not valid_instances:
+        return make_result(
+            selectedCount=len(selected_instances),
+            validSourceCount=0,
+            invalidSourceIds=invalid_instances,
+            maxDistanceMm=max_distance_value,
+            deleteSources=delete_sources_value,
+            message="선택한 요소 중 work-plane based + LocationPoint 조건을 만족하는 패밀리가 없습니다.",
+        )
+
+    current_candidates = get_current_model_face_candidates()
+    linked_candidates = get_linked_model_face_candidates()
+    candidate_faces = current_candidates + linked_candidates
+
+    if not candidate_faces:
+        return make_result(
+            selectedCount=len(selected_instances),
+            validSourceCount=len(valid_instances),
+            invalidSourceIds=invalid_instances,
+            maxDistanceMm=max_distance_value,
+            deleteSources=delete_sources_value,
+            message="현재 모델 또는 링크된 Revit 모델에서 벽/바닥 후보 면을 찾지 못했습니다.",
+            candidateSummary={
+                "currentModelFaces": len(current_candidates),
+                "linkedModelFaces": len(linked_candidates),
+            },
+        )
+
+    created_ids = []
+    deleted_ids = []
+    skipped = []
+    unhandled_error = None
+
+    TransactionManager.Instance.EnsureInTransaction(doc)
+
+    try:
+        for instance in valid_instances:
+            instance_id = safe_int_id(instance)
+            symbol = instance.Symbol
+            symbol_label = get_symbol_label(symbol)
+            source_point = get_instance_point(instance)
+            nearest_face = find_nearest_face(source_point, candidate_faces, max_distance_internal)
+
+            if nearest_face is None:
+                skipped.append({
+                    "sourceId": instance_id,
+                    "symbol": symbol_label,
+                    "reason": "탐색 거리 안에서 배치 가능한 벽/바닥 면을 찾지 못했습니다.",
+                })
+                continue
+
+            reference_direction = get_reference_direction(instance, nearest_face["normal"])
+            placement_scope = SubTransaction(doc)
+            placement_scope.Start()
+
+            try:
+                ensure_symbol_active(symbol)
+                new_instance = doc.Create.NewFamilyInstance(
+                    nearest_face["reference"],
+                    nearest_face["point"],
+                    reference_direction,
+                    symbol
+                )
+                created_ids.append(new_instance.Id.IntegerValue)
+
+                if delete_sources_value:
+                    try:
+                        doc.Delete(instance.Id)
+                        deleted_ids.append(instance_id)
+                    except Exception as delete_exc:
+                        skipped.append({
+                            "sourceId": instance_id,
+                            "symbol": symbol_label,
+                            "createdId": new_instance.Id.IntegerValue,
+                            "hostId": safe_int_id(nearest_face["hostElement"]),
+                            "hostKind": nearest_face["hostKind"],
+                            "hostSource": nearest_face["sourceKind"],
+                            "linkInstanceId": safe_int_id(nearest_face["linkInstance"]),
+                            "distanceMm": round(from_internal_mm(nearest_face["distance"]), 2),
+                            "reason": "새 인스턴스는 생성됐지만 원본 삭제에 실패했습니다.",
+                            "deleteError": "{0}: {1}".format(type(delete_exc).__name__, delete_exc),
+                        })
+
+                placement_scope.Commit()
+            except Exception as exc:
+                placement_scope.RollBack()
+                skipped.append({
+                    "sourceId": instance_id,
+                    "symbol": symbol_label,
+                    "hostId": safe_int_id(nearest_face["hostElement"]),
+                    "hostKind": nearest_face["hostKind"],
+                    "hostSource": nearest_face["sourceKind"],
+                    "linkInstanceId": safe_int_id(nearest_face["linkInstance"]),
+                    "distanceMm": round(from_internal_mm(nearest_face["distance"]), 2),
+                    "reason": "면 위 배치에 실패했습니다.",
+                    "errorType": type(exc).__name__,
+                    "error": str(exc),
+                })
+                continue
+    except Exception as exc:
+        unhandled_error = "{0}: {1}".format(type(exc).__name__, exc)
+        raise
+    finally:
+        TransactionManager.Instance.TransactionTaskDone()
+
+    return make_result(
+        selectedCount=len(selected_instances),
+        validSourceCount=len(valid_instances),
+        invalidSourceIds=invalid_instances,
+        maxDistanceMm=max_distance_value,
+        deleteSources=delete_sources_value,
+        createdIds=created_ids,
+        deletedIds=deleted_ids,
+        skipped=skipped,
+        unhandledError=unhandled_error,
+        candidateSummary={
+            "currentModelFaces": len(current_candidates),
+            "linkedModelFaces": len(linked_candidates),
+        },
+        message="완료. 현재 모델과 링크된 Revit 모델의 벽/바닥을 대상으로 최근접 면 배치를 시도했습니다.",
+    )
+
+
+OUT = main()

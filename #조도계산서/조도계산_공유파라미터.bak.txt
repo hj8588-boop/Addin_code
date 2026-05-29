@@ -1,0 +1,15 @@
+# This is a Revit shared parameter file.
+# Do not edit manually.
+*META	VERSION	MINVERSION
+META	2	1
+*GROUP	ID	NAME
+GROUP	1	조도계산
+*PARAM	GUID	NAME	DATATYPE	DATACATEGORY	GROUP	VISIBLE	DESCRIPTION	USERMODIFIABLE	HIDEWHENNOVALUE
+PARAM	7c71726a-4d48-47ab-a9cf-378d20ee3be1	조도_요구조도_lx	NUMBER		1	1	실의 목표 조도값(lx)	1	0
+PARAM	336d38d0-f837-4975-97a3-7840b859e0ea	조도_조명율	NUMBER		1	1	실 조명율	1	0
+PARAM	f5d4d365-ee8d-4049-95a5-a4514b9d13ee	조도_보수율	NUMBER		1	1	실 보수율	1	0
+PARAM	3bb2f0dc-9f2d-4ca1-8c44-03f427d59ee4	조도_반사율	NUMBER		1	1	실 반사율	1	0
+PARAM	27cf4b04-cb26-4138-80ee-61625a424443	조도_필요등수	NUMBER		1	1	계산된 필요 등기구 수	1	0
+PARAM	7be31e84-654b-44e6-a9b5-f2996db41d82	조도_적용광속_lm	NUMBER		1	1	계산에 사용된 등기구 광속(lm)	1	0
+PARAM	9e24380b-281d-4d46-a7cf-71d1ed2f3d03	조도_적용기구	TEXT		1	1	계산에 사용된 등기구 이름	1	0
+PARAM	c286dbd6-f8d1-43af-b484-e8ef8602643b	조도_광속_lm	NUMBER		1	1	등기구 1개당 광속(lm)	1	0

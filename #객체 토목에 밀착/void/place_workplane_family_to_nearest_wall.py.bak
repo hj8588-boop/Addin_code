@@ -1,0 +1,339 @@
+import clr
+
+clr.AddReference("RevitAPI")
+from Autodesk.Revit.DB import (
+    FamilyInstance,
+    FamilyPlacementType,
+    FilteredElementCollector,
+    HostObjectUtils,
+    LocationPoint,
+    ShellLayerType,
+    SubTransaction,
+    UnitUtils,
+    Wall,
+    XYZ,
+)
+
+clr.AddReference("RevitServices")
+from RevitServices.Persistence import DocumentManager
+from RevitServices.Transactions import TransactionManager
+
+doc = DocumentManager.Instance.CurrentDBDocument
+uidoc = DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument
+
+max_distance_mm = IN[0] if len(IN) > 0 else 3000
+delete_sources = IN[1] if len(IN) > 1 else False
+
+
+def to_bool(value):
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    return str(value).strip().lower() in ["true", "1", "yes", "y"]
+
+
+def to_float(value, default_value):
+    try:
+        return float(value)
+    except Exception:
+        return default_value
+
+
+def to_internal_mm(value_in_mm):
+    try:
+        from Autodesk.Revit.DB import UnitTypeId
+
+        return UnitUtils.ConvertToInternalUnits(value_in_mm, UnitTypeId.Millimeters)
+    except Exception:
+        from Autodesk.Revit.DB import DisplayUnitType
+
+        return UnitUtils.ConvertToInternalUnits(value_in_mm, DisplayUnitType.DUT_MILLIMETERS)
+
+
+def from_internal_mm(value_in_internal_units):
+    try:
+        from Autodesk.Revit.DB import UnitTypeId
+
+        return UnitUtils.ConvertFromInternalUnits(value_in_internal_units, UnitTypeId.Millimeters)
+    except Exception:
+        from Autodesk.Revit.DB import DisplayUnitType
+
+        return UnitUtils.ConvertFromInternalUnits(value_in_internal_units, DisplayUnitType.DUT_MILLIMETERS)
+
+
+def normalize_xyz(vector):
+    if vector is None:
+        return None
+    length = vector.GetLength()
+    if length < 1e-9:
+        return None
+    return vector.Normalize()
+
+
+def safe_int_id(element):
+    try:
+        return element.Id.IntegerValue
+    except Exception:
+        return None
+
+
+def get_symbol_label(symbol):
+    try:
+        family_name = symbol.Family.Name
+    except Exception:
+        family_name = "UnknownFamily"
+
+    try:
+        type_name = symbol.Name
+    except Exception:
+        type_name = "UnknownType"
+
+    return "{0} : {1}".format(family_name, type_name)
+
+
+def get_selected_family_instances():
+    selected_ids = list(uidoc.Selection.GetElementIds())
+    instances = []
+
+    for element_id in selected_ids:
+        element = doc.GetElement(element_id)
+        if isinstance(element, FamilyInstance):
+            instances.append(element)
+
+    return instances
+
+
+def is_workplane_based(instance):
+    try:
+        return instance.Symbol.Family.FamilyPlacementType == FamilyPlacementType.WorkPlaneBased
+    except Exception:
+        return False
+
+
+def get_instance_point(instance):
+    location = instance.Location
+    if isinstance(location, LocationPoint):
+        return location.Point
+    return None
+
+
+def get_candidate_wall_faces():
+    candidates = []
+    walls = FilteredElementCollector(doc).OfClass(Wall).WhereElementIsNotElementType()
+
+    for wall in walls:
+        side_references = []
+        for layer_type in [ShellLayerType.Exterior, ShellLayerType.Interior]:
+            try:
+                side_references.extend(list(HostObjectUtils.GetSideFaces(wall, layer_type)))
+            except Exception:
+                continue
+
+        for reference in side_references:
+            try:
+                face = wall.GetGeometryObjectFromReference(reference)
+            except Exception:
+                face = None
+
+            if face is None:
+                continue
+
+            candidates.append({
+                "wall": wall,
+                "reference": reference,
+                "face": face,
+            })
+
+    return candidates
+
+
+def find_nearest_face(point, candidates, max_distance_internal):
+    best_match = None
+    best_distance = None
+
+    for candidate in candidates:
+        face = candidate["face"]
+
+        try:
+            projection = face.Project(point)
+        except Exception:
+            projection = None
+
+        if projection is None:
+            continue
+
+        projected_point = projection.XYZPoint
+        distance = point.DistanceTo(projected_point)
+        if max_distance_internal > 0 and distance > max_distance_internal:
+            continue
+
+        try:
+            normal = normalize_xyz(face.ComputeNormal(projection.UVPoint))
+        except Exception:
+            normal = None
+
+        if normal is None:
+            continue
+
+        if abs(normal.Z) > 0.25:
+            continue
+
+        if best_distance is None or distance < best_distance:
+            best_distance = distance
+            best_match = {
+                "wall": candidate["wall"],
+                "reference": candidate["reference"],
+                "point": projected_point,
+                "normal": normal,
+                "distance": distance,
+            }
+
+    return best_match
+
+
+def get_reference_direction(instance, face_normal):
+    candidates = []
+
+    try:
+        candidates.append(instance.HandOrientation)
+    except Exception:
+        pass
+
+    try:
+        candidates.append(instance.FacingOrientation)
+    except Exception:
+        pass
+
+    candidates.extend([XYZ.BasisZ, XYZ.BasisX, XYZ.BasisY])
+
+    for vector in candidates:
+        normalized = normalize_xyz(vector)
+        if normalized is None:
+            continue
+
+        projected = normalized - face_normal.Multiply(normalized.DotProduct(face_normal))
+        projected = normalize_xyz(projected)
+        if projected is not None:
+            return projected
+
+    return XYZ.BasisZ
+
+
+def ensure_symbol_active(symbol):
+    if symbol is not None and not symbol.IsActive:
+        symbol.Activate()
+        doc.Regenerate()
+
+
+selected_instances = get_selected_family_instances()
+max_distance_value = max(0.0, to_float(max_distance_mm, 3000.0))
+max_distance_internal = to_internal_mm(max_distance_value)
+delete_sources = to_bool(delete_sources)
+
+if not selected_instances:
+    raise Exception("Select at least one source family instance in Revit before running Dynamo.")
+
+invalid_instances = []
+valid_instances = []
+
+for instance in selected_instances:
+    if not is_workplane_based(instance):
+        invalid_instances.append(instance.Id.IntegerValue)
+        continue
+
+    if get_instance_point(instance) is None:
+        invalid_instances.append(instance.Id.IntegerValue)
+        continue
+
+    valid_instances.append(instance)
+
+if not valid_instances:
+    raise Exception("No valid work-plane based family instances were found in the current selection.")
+
+candidate_faces = get_candidate_wall_faces()
+if not candidate_faces:
+    raise Exception("No wall side faces were found in the current project.")
+
+created_ids = []
+deleted_ids = []
+skipped = []
+unhandled_error = None
+
+TransactionManager.Instance.EnsureInTransaction(doc)
+
+try:
+    for instance in valid_instances:
+        instance_id = safe_int_id(instance)
+        symbol = instance.Symbol
+        symbol_label = get_symbol_label(symbol)
+        source_point = get_instance_point(instance)
+        nearest_face = find_nearest_face(source_point, candidate_faces, max_distance_internal)
+
+        if nearest_face is None:
+            skipped.append({
+                "sourceId": instance_id,
+                "symbol": symbol_label,
+                "reason": "No nearby wall face found within the search distance.",
+            })
+            continue
+
+        reference_direction = get_reference_direction(instance, nearest_face["normal"])
+        placement_scope = SubTransaction(doc)
+        placement_scope.Start()
+
+        try:
+            ensure_symbol_active(symbol)
+            new_instance = doc.Create.NewFamilyInstance(
+                nearest_face["reference"],
+                nearest_face["point"],
+                reference_direction,
+                symbol
+            )
+            created_ids.append(new_instance.Id.IntegerValue)
+
+            if delete_sources:
+                try:
+                    doc.Delete(instance.Id)
+                    deleted_ids.append(instance_id)
+                except Exception as delete_exc:
+                    skipped.append({
+                        "sourceId": instance_id,
+                        "symbol": symbol_label,
+                        "createdId": new_instance.Id.IntegerValue,
+                        "wallId": safe_int_id(nearest_face["wall"]),
+                        "distanceMm": round(from_internal_mm(nearest_face["distance"]), 2),
+                        "reason": "New instance was created, but the source instance could not be deleted.",
+                        "deleteError": "{0}: {1}".format(type(delete_exc).__name__, delete_exc),
+                    })
+
+            placement_scope.Commit()
+        except Exception as exc:
+            placement_scope.RollBack()
+            skipped.append({
+                "sourceId": instance_id,
+                "symbol": symbol_label,
+                "wallId": safe_int_id(nearest_face["wall"]),
+                "distanceMm": round(from_internal_mm(nearest_face["distance"]), 2),
+                "reason": "Placement failed.",
+                "errorType": type(exc).__name__,
+                "error": str(exc),
+            })
+            continue
+except Exception as exc:
+    unhandled_error = "{0}: {1}".format(type(exc).__name__, exc)
+    raise
+finally:
+    TransactionManager.Instance.TransactionTaskDone()
+
+OUT = {
+    "selectedCount": len(selected_instances),
+    "validSourceCount": len(valid_instances),
+    "invalidSourceIds": invalid_instances,
+    "maxDistanceMm": max_distance_value,
+    "deleteSources": delete_sources,
+    "createdIds": created_ids,
+    "deletedIds": deleted_ids,
+    "skipped": skipped,
+    "unhandledError": unhandled_error,
+}

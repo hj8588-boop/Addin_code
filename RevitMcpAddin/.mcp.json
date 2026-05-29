@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "revit": {
+      "command": "python",
+      "args": ["scripts/revit_mcp_server.py"],
+      "cwd": "c:\\Users\\user\\Desktop\\codex\\RevitMcpAddin"
+    }
+  }
+}

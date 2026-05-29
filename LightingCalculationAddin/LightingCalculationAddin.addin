@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Lighting Calculation</Name>
+    <Assembly>%APPDATA%\Autodesk\Revit\Addins\2024\LightingCalculationAddin\LightingCalculationAddin.dll</Assembly>
+    <AddInId>8F2601A6-11F7-44CE-A41E-2DD486C61B51</AddInId>
+    <FullClassName>LightingCalculationAddin.App</FullClassName>
+    <VendorId>CODEX</VendorId>
+    <VendorDescription>Space lighting fixture count calculator</VendorDescription>
+  </AddIn>
+</RevitAddIns>

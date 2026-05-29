@@ -1,0 +1,578 @@
+﻿{
+    "Uuid":  "1bd1a9f7-42bf-4875-a48c-3e0dfb40ab62",
+    "IsCustomNode":  false,
+    "Description":  "",
+    "Name":  "edge_fit_rotate_260112_nrbscurve",
+    "ElementResolver":  {
+                            "ResolutionMap":  {
+                                                  "Math":  {
+                                                               "Key":  "DSCore.Math",
+                                                               "Value":  "DSCoreNodes.dll"
+                                                           },
+                                                  "String":  {
+                                                                 "Key":  "DSCore.String",
+                                                                 "Value":  "DSCoreNodes.dll"
+                                                             }
+                                              }
+                        },
+    "Inputs":  [
+
+               ],
+    "Outputs":  [
+
+                ],
+    "Nodes":  [
+                  {
+                      "ConcreteType":  "PythonNodeModels.PythonNode, PythonNodeModels",
+                      "Code":  "# -*- coding: utf-8 -*-\nimport clr\nimport math\n\nclr.AddReference(\"RevitServices\")\nclr.AddReference(\"RevitAPI\")\nclr.AddReference(\"RevitAPIUI\")\nclr.AddReference(\"System\")\n\nfrom RevitServices.Persistence import DocumentManager\nfrom RevitServices.Transactions import TransactionManager\nfrom Autodesk.Revit.DB import *\nfrom Autodesk.Revit.DB.Structure import StructuralType\nfrom Autodesk.Revit.Exceptions import OperationCanceledException\nfrom Autodesk.Revit.UI import Selection\nfrom System.Collections.Generic import List\n\ndoc   = DocumentManager.Instance.CurrentDBDocument\nuidoc = DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument\nview  = doc.ActiveView\n\nspacing_mm  = IN[0]\nsymbol_in   = IN[1]\ntol_mm      = IN[2]\nrotate_mode = IN[3]\nrepick      = IN[4]\noff_perp_mm = IN[5]\noff_par_mm  = IN[6]\n\nspacing = float(spacing_mm) / 304.8\ntol     = float(tol_mm) / 304.8\noff_perp = float(off_perp_mm) / 304.8\noff_par  = float(off_par_mm) / 304.8\n\nsymbols = UnwrapElement(symbol_in)\nsymbol  = symbols[0] if isinstance(symbols, list) else symbols\n\ndef dist(a, b): return a.DistanceTo(b)\n\ndef reverse_curve(c):\n    try:\n        rc = c.Clone()\n        rc.Reverse()\n        return rc\n    except:\n        try:\n            return c.CreateReversed()\n        except:\n            return c\n\ndef get_element_transform(element):\n    try:\n        if isinstance(element, ImportInstance):\n            return element.GetTotalTransform()\n    except:\n        pass\n    try:\n        return element.GetTransform()\n    except:\n        return Transform.Identity\n\ndef transform_xyz(transform, point):\n    try:\n        return transform.OfPoint(point)\n    except:\n        return point\n\ndef transform_curve(transform, curve):\n    try:\n        return curve.CreateTransformed(transform)\n    except:\n        return curve\n\ndef get_geometry_from_reference(reference):\n    element = doc.GetElement(reference.ElementId)\n    if element is None:\n        return None, Transform.Identity, None\n    transform = get_element_transform(element)\n    try:\n        geom = element.GetGeometryObjectFromReference(reference)\n    except:\n        geom = None\n    return element, transform, geom\n\ndef get_curve_like_geometry(reference):\n    element, transform, geom = get_geometry_from_reference(reference)\n    if geom is None:\n        return []\n\n    curves = []\n    try:\n        curve = geom.AsCurve()\n        if curve is not None:\n            curves.append(transform_curve(transform, curve))\n            return curves\n    except:\n        pass\n\n    try:\n        if isinstance(geom, PolyLine):\n            pts = list(geom.GetCoordinates())\n            for i in range(len(pts) - 1):\n                p0 = transform_xyz(transform, pts[i])\n                p1 = transform_xyz(transform, pts[i + 1])\n                if p0.DistanceTo(p1) \u003e 1e-9:\n                    curves.append(Line.CreateBound(p0, p1))\n            return curves\n    except:\n        pass\n\n    try:\n        if hasattr(geom, \"Tessellate\"):\n            pts = list(geom.Tessellate())\n            for i in range(len(pts) - 1):\n                p0 = transform_xyz(transform, pts[i])\n                p1 = transform_xyz(transform, pts[i + 1])\n                if p0.DistanceTo(p1) \u003e 1e-9:\n                    curves.append(Line.CreateBound(p0, p1))\n    except:\n        pass\n    return curves\n\ndef get_face_from_reference(reference):\n    element, transform, geom = get_geometry_from_reference(reference)\n    try:\n        if isinstance(geom, Face):\n            return geom, transform\n    except:\n        pass\n    return None, Transform.Identity\n\ndef refs_to_curves(refs):\n    curves = []\n    for ref in refs:\n        curves.extend(get_curve_like_geometry(ref))\n    return curves\n\ndef build_runs(curves, tol):\n    segs = []\n    for i, c in enumerate(curves):\n        segs.append({\"id\": i, \"curve\": c, \"p0\": c.GetEndPoint(0), \"p1\": c.GetEndPoint(1), \"used\": False})\n    runs = []\n\n    def find_conn(pt):\n        for s in segs:\n            if s[\"used\"]:\n                continue\n            if dist(pt, s[\"p0\"]) \u003c= tol: return s, 0\n            if dist(pt, s[\"p1\"]) \u003c= tol: return s, 1\n        return None, None\n\n    for s in segs:\n        if s[\"used\"]:\n            continue\n        run = [s]\n        s[\"used\"] = True\n\n        end = s[\"p1\"]\n        while True:\n            ns, f = find_conn(end)\n            if not ns:\n                break\n            c = ns[\"curve\"]\n            if f == 1:\n                c = reverse_curve(c)\n            ns[\"curve\"] = c\n            ns[\"p0\"] = c.GetEndPoint(0)\n            ns[\"p1\"] = c.GetEndPoint(1)\n            run.append(ns)\n            ns[\"used\"] = True\n            end = ns[\"p1\"]\n\n        start = s[\"p0\"]\n        while True:\n            ns, f = find_conn(start)\n            if not ns:\n                break\n            c = ns[\"curve\"]\n            if f == 0:\n                c = reverse_curve(c)\n            ns[\"curve\"] = c\n            ns[\"p0\"] = c.GetEndPoint(0)\n            ns[\"p1\"] = c.GetEndPoint(1)\n            run.insert(0, ns)\n            ns[\"used\"] = True\n            start = ns[\"p0\"]\n\n        runs.append([r[\"curve\"] for r in run])\n    return runs\n\ndef match_runs(main_runs, side_curves):\n    pairs = []\n    for mr in main_runs:\n        pairs.append((mr, side_curves))\n    return pairs\n\ndef get_instance_point(inst):\n    try:\n        loc = inst.Location\n        if hasattr(loc, \"Point\") and loc.Point is not None:\n            return loc.Point\n    except:\n        pass\n    return XYZ.Zero\n\ndef normalize_xy(vec):\n    try:\n        flat = XYZ(vec.X, vec.Y, 0.0)\n        if flat.GetLength() \u003c 1e-9:\n            return None\n        return flat.Normalize()\n    except:\n        return None\n\ndef signed_angle_xy(from_vec, to_vec):\n    from_n = normalize_xy(from_vec)\n    to_n = normalize_xy(to_vec)\n    if from_n is None or to_n is None:\n        return 0.0\n    dot = max(-1.0, min(1.0, from_n.DotProduct(to_n)))\n    angle = math.acos(dot)\n    cross_z = from_n.X * to_n.Y - from_n.Y * to_n.X\n    if cross_z \u003c 0:\n        angle = -angle\n    return angle\n\ndef get_instance_x_axis(inst):\n    candidates = []\n    try:\n        candidates.append(inst.HandOrientation)\n    except:\n        pass\n    try:\n        candidates.append(inst.FacingOrientation)\n    except:\n        pass\n    for candidate in candidates:\n        normalized = normalize_xy(candidate)\n        if normalized is not None:\n            return normalized\n    return XYZ.BasisX\n\ndef rotate_instance_zonly(inst, target_x):\n    current_x = get_instance_x_axis(inst)\n    target_x = normalize_xy(target_x)\n    if target_x is None:\n        return\n    pivot = get_instance_point(inst)\n    angle = signed_angle_xy(current_x, target_x)\n    if abs(angle) \u003c 1e-6:\n        return\n    try:\n        axis = Line.CreateBound(pivot, pivot + XYZ.BasisZ)\n        ElementTransformUtils.RotateElement(doc, inst.Id, axis, angle)\n    except:\n        pass\n\ndef get_side_point_from_curves(side_curves, target_pt):\n    best_pt = None\n    best_d = None\n    for sc in side_curves:\n        try:\n            pr = sc.Project(target_pt)\n        except:\n            pr = None\n        if pr:\n            dd = pr.XYZPoint.DistanceTo(target_pt)\n            if best_d is None or dd \u003c best_d:\n                best_d = dd\n                best_pt = pr.XYZPoint\n    return best_pt\n\ndef get_side_point_from_face(face_ref, target_pt):\n    face, transform = get_face_from_reference(face_ref)\n    if face is None:\n        return None\n    try:\n        pr = face.Project(target_pt)\n        if pr is None:\n            return None\n        return transform_xyz(transform, pr.XYZPoint)\n    except:\n        return None\n\nclass MainCurvePickFilter(Selection.ISelectionFilter):\n    def AllowElement(self, element):\n        return True\n    def AllowReference(self, reference, position):\n        return True\n\nclass SideAnyPickFilter(Selection.ISelectionFilter):\n    def AllowElement(self, element):\n        return True\n    def AllowReference(self, reference, position):\n        return True\n\ndef pick_main_curve_refs():\n    refs = uidoc.Selection.PickObjects(\n        Selection.ObjectType.PointOnElement,\n        MainCurvePickFilter(),\n        \"1) Main edge pick (Revit or 3D DWG, TAB if needed)\"\n    )\n    valid = []\n    for r in refs:\n        if len(get_curve_like_geometry(r)) \u003e 0:\n            valid.append(r)\n    return valid\n\ndef pick_side_refs():\n    return uidoc.Selection.PickObjects(\n        Selection.ObjectType.PointOnElement,\n        SideAnyPickFilter(),\n        \"2) Side face or edge pick (Revit or 3D DWG, TAB if needed)\"\n    )\n\nglobal _MAIN_REFS, _SIDE_REFS\ntry: _MAIN_REFS\nexcept: _MAIN_REFS=None\ntry: _SIDE_REFS\nexcept: _SIDE_REFS=None\n\ntry:\n    uidoc.Selection.SetElementIds(List[ElementId]())\nexcept:\n    pass\n\nif repick or _MAIN_REFS is None or _SIDE_REFS is None:\n    try:\n        main_refs = pick_main_curve_refs()\n        side_refs = pick_side_refs()\n    except OperationCanceledException:\n        OUT = []\n    else:\n        _MAIN_REFS = main_refs\n        _SIDE_REFS = side_refs\nelse:\n    main_refs = _MAIN_REFS\n    side_refs = _SIDE_REFS\n\nif \u0027main_refs\u0027 in globals() and \u0027side_refs\u0027 in globals() and symbol is not None and spacing \u003e 0:\n    main_runs = build_runs(refs_to_curves(main_refs), tol)\n    side_curves = refs_to_curves(side_refs)\n    pairs = match_runs(main_runs, side_curves)\n\n    TransactionManager.Instance.EnsureInTransaction(doc)\n    if not symbol.IsActive:\n        symbol.Activate()\n\n    instances = []\n    origin_pt = XYZ.Zero\n\n    for mr, sr in pairs:\n        lens = [c.Length for c in mr]\n        total = sum(lens)\n        if total \u003c 1e-6:\n            continue\n\n        cum = [0.0]\n        acc = 0.0\n        for L in lens:\n            acc += L\n            cum.append(acc)\n\n        def locate(d):\n            for i, L in enumerate(lens):\n                if d \u003c= cum[i + 1] + 1e-9:\n                    t = (d - cum[i]) / L if L \u003e 1e-9 else 0.0\n                    return i, max(0.0, min(1.0, t))\n            return len(lens) - 1, 1.0\n\n        d = off_par\n        if d \u003c 0:\n            d = 0.0\n        if d \u003e total:\n            d = total\n\n        while d \u003c= total + 1e-9:\n            idx, t = locate(d)\n            c = mr[idx]\n\n            target_pt = c.Evaluate(t, True)\n            deriv = c.ComputeDerivatives(t, True)\n            tanDir = deriv.BasisX.Normalize()\n\n            best_pt = get_side_point_from_curves(sr, target_pt)\n            if best_pt is None:\n                for side_ref in side_refs:\n                    best_pt = get_side_point_from_face(side_ref, target_pt)\n                    if best_pt is not None:\n                        break\n            if best_pt is None:\n                d += spacing\n                continue\n\n            rawY = (best_pt - target_pt)\n            rawY = rawY - tanDir.Multiply(rawY.DotProduct(tanDir))\n            if rawY.GetLength() \u003c 1e-6:\n                d += spacing\n                continue\n            yDir = rawY.Normalize()\n\n            zDir = tanDir.CrossProduct(yDir)\n            if zDir.GetLength() \u003c 1e-9:\n                d += spacing\n                continue\n            xDir = yDir.CrossProduct(zDir)\n            if xDir.GetLength() \u003c 1e-9:\n                d += spacing\n                continue\n            xDir = xDir.Normalize()\n\n            if rotate_mode == 1:\n                target_x = yDir\n            elif rotate_mode == 2:\n                target_x = xDir.Negate()\n            else:\n                target_x = xDir\n\n            target_pt = target_pt + (yDir * off_perp)\n\n            try:\n                plane = Plane.CreateByOriginAndBasis(origin_pt, XYZ.BasisX, XYZ.BasisY)\n                skp = SketchPlane.Create(doc, plane)\n                view.SketchPlane = skp\n\n                inst = doc.Create.NewFamilyInstance(\n                    origin_pt, symbol, skp, StructuralType.NonStructural\n                )\n                current_pt = get_instance_point(inst)\n                move_vec = target_pt - current_pt\n                ElementTransformUtils.MoveElement(doc, inst.Id, move_vec)\n                doc.Regenerate()\n                rotate_instance_zonly(inst, target_x)\n                instances.append(inst)\n            except:\n                pass\n\n            d += spacing\n\n    TransactionManager.Instance.TransactionTaskDone()\n    OUT = instances\nelif \u0027OUT\u0027 not in globals():\n    OUT = []",
+                      "Engine":  "IronPython2",
+                      "EngineName":  "IronPython2",
+                      "VariableInputPorts":  true,
+                      "Id":  "9a4915813840461bbf0517d09e8c63d5",
+                      "NodeType":  "PythonScriptNode",
+                      "Inputs":  [
+                                     {
+                                         "Id":  "f50cc6f4df0d4015b6b40c4219f89041",
+                                         "Name":  "IN[0]",
+                                         "Description":  "Input #0",
+                                         "UsingDefaultValue":  false,
+                                         "Level":  2,
+                                         "UseLevels":  false,
+                                         "KeepListStructure":  false
+                                     },
+                                     {
+                                         "Id":  "500785ac82fb40588d16fe74ffb061fd",
+                                         "Name":  "IN[1]",
+                                         "Description":  "Input #1",
+                                         "UsingDefaultValue":  false,
+                                         "Level":  2,
+                                         "UseLevels":  false,
+                                         "KeepListStructure":  false
+                                     },
+                                     {
+                                         "Id":  "234da2b303174182a98b354d3e28aa36",
+                                         "Name":  "IN[2]",
+                                         "Description":  "Input #2",
+                                         "UsingDefaultValue":  false,
+                                         "Level":  2,
+                                         "UseLevels":  false,
+                                         "KeepListStructure":  false
+                                     },
+                                     {
+                                         "Id":  "e69cda59889d4391a9313d1b9ca72774",
+                                         "Name":  "IN[3]",
+                                         "Description":  "Input #3",
+                                         "UsingDefaultValue":  false,
+                                         "Level":  2,
+                                         "UseLevels":  false,
+                                         "KeepListStructure":  false
+                                     },
+                                     {
+                                         "Id":  "ce758bfb6f4346aa8788734203ca3939",
+                                         "Name":  "IN[4]",
+                                         "Description":  "Input #4",
+                                         "UsingDefaultValue":  false,
+                                         "Level":  2,
+                                         "UseLevels":  false,
+                                         "KeepListStructure":  false
+                                     },
+                                     {
+                                         "Id":  "b33a69bfb45f407bab8b4fc77eedaecf",
+                                         "Name":  "IN[5]",
+                                         "Description":  "Input #5",
+                                         "UsingDefaultValue":  false,
+                                         "Level":  2,
+                                         "UseLevels":  false,
+                                         "KeepListStructure":  false
+                                     },
+                                     {
+                                         "Id":  "af3d74bf727c4434a4d3bd2c77a4391e",
+                                         "Name":  "IN[6]",
+                                         "Description":  "Input #6",
+                                         "UsingDefaultValue":  false,
+                                         "Level":  2,
+                                         "UseLevels":  false,
+                                         "KeepListStructure":  false
+                                     }
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "6a2b631f5b0642428a9962ca673f8336",
+                                          "Name":  "OUT",
+                                          "Description":  "Result of the python script",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "Runs an embedded Python script."
+                  },
+                  {
+                      "ConcreteType":  "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+                      "NumberType":  "Double",
+                      "Id":  "28853605db3447dd98df6fcca3ae1a11",
+                      "NodeType":  "NumberInputNode",
+                      "Inputs":  [
+
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "f0060f45cbc9432791bb847a6eca55df",
+                                          "Name":  "",
+                                          "Description":  "Double",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "Creates a number",
+                      "InputValue":  500.0
+                  },
+                  {
+                      "ConcreteType":  "DSRevitNodesUI.FamilyTypes, DSRevitNodesUI",
+                      "SelectedIndex":  302,
+                      "SelectedString":  "콘크리트 트라프 T400W:콘크리트 트라프 T400W 테스트",
+                      "Id":  "2d0ce39007f74ca3a6146da2c3f8bd83",
+                      "NodeType":  "ExtensionNode",
+                      "Inputs":  [
+
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "453f7838f13540b596b1e39954428d02",
+                                          "Name":  "Family Type",
+                                          "Description":  "The selected Family Type",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "All family types available in the document."
+                  },
+                  {
+                      "ConcreteType":  "CoreNodeModels.Input.IntegerSlider, CoreNodeModels",
+                      "NumberType":  "Integer",
+                      "MaximumValue":  100,
+                      "MinimumValue":  0,
+                      "StepValue":  1,
+                      "Id":  "ef20cd9c3db0432bab05827c1cf972ad",
+                      "NodeType":  "NumberInputNode",
+                      "Inputs":  [
+
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "dd6af8d29c6647e0b9c40407626d7169",
+                                          "Name":  "",
+                                          "Description":  "Int64",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "Produces integer values",
+                      "InputValue":  1
+                  },
+                  {
+                      "ConcreteType":  "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+                      "NumberType":  "Double",
+                      "Id":  "a9ecd268c75f48eab79adae089926d74",
+                      "NodeType":  "NumberInputNode",
+                      "Inputs":  [
+
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "93aaa6627af943beb623958a2ac61891",
+                                          "Name":  "",
+                                          "Description":  "Double",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "Creates a number",
+                      "InputValue":  100.0
+                  },
+                  {
+                      "ConcreteType":  "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+                      "Id":  "ff4260d43152479aa9fbcc404819ed5c",
+                      "NodeType":  "BooleanInputNode",
+                      "Inputs":  [
+
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "d95e457246b2470e845f3b841af7c92e",
+                                          "Name":  "",
+                                          "Description":  "Boolean",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "Enables selection between True and False",
+                      "InputValue":  true
+                  },
+                  {
+                      "ConcreteType":  "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+                      "NumberType":  "Double",
+                      "Id":  "062d4ec3eb754e06ba2d6289f4b52dad",
+                      "NodeType":  "NumberInputNode",
+                      "Inputs":  [
+
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "e4d53b40de514f19a423b3905a926055",
+                                          "Name":  "",
+                                          "Description":  "Double",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "Creates a number",
+                      "InputValue":  0.0
+                  },
+                  {
+                      "ConcreteType":  "CoreNodeModels.Input.DoubleInput, CoreNodeModels",
+                      "NumberType":  "Double",
+                      "Id":  "eee04474f1ef4accad5e1ba427d5c392",
+                      "NodeType":  "NumberInputNode",
+                      "Inputs":  [
+
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "8bcb7628a3e24b3db5fb5e7186b4a897",
+                                          "Name":  "",
+                                          "Description":  "Double",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "Creates a number",
+                      "InputValue":  400.0
+                  }
+              ],
+    "Connectors":  [
+                       {
+                           "Start":  "f0060f45cbc9432791bb847a6eca55df",
+                           "End":  "f50cc6f4df0d4015b6b40c4219f89041",
+                           "Id":  "9e695816737c4795b1781d699eefb20f",
+                           "IsHidden":  "False"
+                       },
+                       {
+                           "Start":  "453f7838f13540b596b1e39954428d02",
+                           "End":  "500785ac82fb40588d16fe74ffb061fd",
+                           "Id":  "932a8295e6e04b07a0eba13bda2dc9da",
+                           "IsHidden":  "False"
+                       },
+                       {
+                           "Start":  "dd6af8d29c6647e0b9c40407626d7169",
+                           "End":  "e69cda59889d4391a9313d1b9ca72774",
+                           "Id":  "8bd5f4b6f9024f65a735446e83093204",
+                           "IsHidden":  "False"
+                       },
+                       {
+                           "Start":  "93aaa6627af943beb623958a2ac61891",
+                           "End":  "234da2b303174182a98b354d3e28aa36",
+                           "Id":  "29c50459e42f49d8936e72b01be4c191",
+                           "IsHidden":  "False"
+                       },
+                       {
+                           "Start":  "d95e457246b2470e845f3b841af7c92e",
+                           "End":  "ce758bfb6f4346aa8788734203ca3939",
+                           "Id":  "71671f107c7f4ba092ec4d0bd17829a0",
+                           "IsHidden":  "False"
+                       },
+                       {
+                           "Start":  "e4d53b40de514f19a423b3905a926055",
+                           "End":  "af3d74bf727c4434a4d3bd2c77a4391e",
+                           "Id":  "90f4f649dfd744efba85863c0c56dd43",
+                           "IsHidden":  "False"
+                       },
+                       {
+                           "Start":  "8bcb7628a3e24b3db5fb5e7186b4a897",
+                           "End":  "b33a69bfb45f407bab8b4fc77eedaecf",
+                           "Id":  "b4b89487f4d54103b95775357b56d9bb",
+                           "IsHidden":  "False"
+                       }
+                   ],
+    "Dependencies":  [
+
+                     ],
+    "NodeLibraryDependencies":  [
+
+                                ],
+    "Thumbnail":  "",
+    "GraphDocumentationURL":  null,
+    "ExtensionWorkspaceData":  [
+                                   {
+                                       "ExtensionGuid":  "28992e1d-abb9-417f-8b1b-05e053bee670",
+                                       "Name":  "Properties",
+                                       "Version":  "2.18",
+                                       "Data":  {
+
+                                                }
+                                   },
+                                   {
+                                       "ExtensionGuid":  "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+                                       "Name":  "Generative Design",
+                                       "Version":  "6.0",
+                                       "Data":  {
+
+                                                }
+                                   }
+                               ],
+    "Author":  "",
+    "Linting":  {
+                    "activeLinter":  "None",
+                    "activeLinterId":  "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+                    "warningCount":  0,
+                    "errorCount":  0
+                },
+    "Bindings":  [
+
+                 ],
+    "View":  {
+                 "Dynamo":  {
+                                "ScaleFactor":  100.0,
+                                "HasRunWithoutCrash":  true,
+                                "IsVisibleInDynamoLibrary":  true,
+                                "Version":  "2.18.1.5096",
+                                "RunType":  "Manual",
+                                "RunPeriod":  "1000"
+                            },
+                 "Camera":  {
+                                "Name":  "_Background Preview",
+                                "EyeX":  -46.079280853271484,
+                                "EyeY":  121.14533996582031,
+                                "EyeZ":  254.34500122070313,
+                                "LookX":  55.938411712646484,
+                                "LookY":  -60.599899291992188,
+                                "LookZ":  -270.37570190429688,
+                                "UpX":  0.0,
+                                "UpY":  1.0,
+                                "UpZ":  0.0
+                            },
+                 "ConnectorPins":  [
+
+                                   ],
+                 "NodeViews":  [
+                                   {
+                                       "Id":  "9a4915813840461bbf0517d09e8c63d5",
+                                       "Name":  "Python Script",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  -491.536291007883,
+                                       "Y":  -2823.88946280301
+                                   },
+                                   {
+                                       "Id":  "28853605db3447dd98df6fcca3ae1a11",
+                                       "Name":  "Number",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  -984.35759988583288,
+                                       "Y":  -3048.5369845642072
+                                   },
+                                   {
+                                       "Id":  "2d0ce39007f74ca3a6146da2c3f8bd83",
+                                       "Name":  "Family Types",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  -1373.1946288496886,
+                                       "Y":  -2826.4874426647075
+                                   },
+                                   {
+                                       "Id":  "ef20cd9c3db0432bab05827c1cf972ad",
+                                       "Name":  "Integer Slider",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  -1193.9507824375828,
+                                       "Y":  -2469.1767653852048
+                                   },
+                                   {
+                                       "Id":  "a9ecd268c75f48eab79adae089926d74",
+                                       "Name":  "Number",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  -975.24738388774892,
+                                       "Y":  -2674.1891520318268
+                                   },
+                                   {
+                                       "Id":  "ff4260d43152479aa9fbcc404819ed5c",
+                                       "Name":  "Boolean",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  -1211.5134181531907,
+                                       "Y":  -2325.2622330035783
+                                   },
+                                   {
+                                       "Id":  "062d4ec3eb754e06ba2d6289f4b52dad",
+                                       "Name":  "Number",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  -711.2499695605128,
+                                       "Y":  -1987.0647966038587
+                                   },
+                                   {
+                                       "Id":  "eee04474f1ef4accad5e1ba427d5c392",
+                                       "Name":  "Number",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  -968.49902946544944,
+                                       "Y":  -2088.8005667446832
+                                   }
+                               ],
+                 "Annotations":  [
+                                     {
+                                         "Id":  "90075a1137514ccb93386a5abde024c3",
+                                         "Title":  "선택한edge-패밀리 센터선 간격 X_offset 값",
+                                         "DescriptionText":  "",
+                                         "IsExpanded":  true,
+                                         "WidthAdjustment":  0.0,
+                                         "HeightAdjustment":  0.0,
+                                         "Nodes":  [
+                                                       "062d4ec3eb754e06ba2d6289f4b52dad"
+                                                   ],
+                                         "HasNestedGroups":  false,
+                                         "Left":  -721.2499695605128,
+                                         "Top":  -2067.0647966038587,
+                                         "Width":  152.0,
+                                         "Height":  212.0,
+                                         "FontSize":  14.0,
+                                         "GroupStyleId":  "00000000-0000-0000-0000-000000000000",
+                                         "InitialTop":  -1987.0647966038587,
+                                         "InitialHeight":  145.0,
+                                         "TextblockHeight":  70.0,
+                                         "Background":  "#FFC1D676"
+                                     },
+                                     {
+                                         "Id":  "c0b6aa65a0f14597ab9677cb64e321eb",
+                                         "Title":  "0=0°, 1=90°, 2=180°",
+                                         "DescriptionText":  "Description \u003cDouble click here to edit group description\u003e",
+                                         "IsExpanded":  true,
+                                         "WidthAdjustment":  0.0,
+                                         "HeightAdjustment":  0.0,
+                                         "Nodes":  [
+                                                       "ef20cd9c3db0432bab05827c1cf972ad"
+                                                   ],
+                                         "HasNestedGroups":  false,
+                                         "Left":  -1203.9507824375828,
+                                         "Top":  -2528.1767653852048,
+                                         "Width":  368.0,
+                                         "Height":  191.0,
+                                         "FontSize":  24.0,
+                                         "GroupStyleId":  "00000000-0000-0000-0000-000000000000",
+                                         "InitialTop":  -2469.1767653852048,
+                                         "InitialHeight":  145.0,
+                                         "TextblockHeight":  49.0,
+                                         "Background":  "#FFC1D676"
+                                     },
+                                     {
+                                         "Id":  "bcbe2670ff3c4016880c2d7ed28ea40b",
+                                         "Title":  "선택한edge-패밀리 센터선 간격 \r\nY_offset_(선택한edge와 평행)",
+                                         "DescriptionText":  "",
+                                         "IsExpanded":  true,
+                                         "WidthAdjustment":  0.0,
+                                         "HeightAdjustment":  0.0,
+                                         "Nodes":  [
+                                                       "eee04474f1ef4accad5e1ba427d5c392"
+                                                   ],
+                                         "HasNestedGroups":  false,
+                                         "Left":  -978.49902946544944,
+                                         "Top":  -2185.8005667446832,
+                                         "Width":  165.68,
+                                         "Height":  229.0,
+                                         "FontSize":  14.0,
+                                         "GroupStyleId":  "00000000-0000-0000-0000-000000000000",
+                                         "InitialTop":  -2088.8005667446832,
+                                         "InitialHeight":  145.0,
+                                         "TextblockHeight":  87.0,
+                                         "Background":  "#FFC1D676"
+                                     },
+                                     {
+                                         "Id":  "4538ba8ab9a34bca8f24bcbd8216937c",
+                                         "Title":  "배치할 패밀리 간격\r\n",
+                                         "DescriptionText":  "",
+                                         "IsExpanded":  true,
+                                         "WidthAdjustment":  0.0,
+                                         "HeightAdjustment":  0.0,
+                                         "Nodes":  [
+                                                       "28853605db3447dd98df6fcca3ae1a11"
+                                                   ],
+                                         "HasNestedGroups":  false,
+                                         "Left":  -994.35759988583288,
+                                         "Top":  -3164.5369845642072,
+                                         "Width":  152.0,
+                                         "Height":  248.0,
+                                         "FontSize":  24.0,
+                                         "GroupStyleId":  "00000000-0000-0000-0000-000000000000",
+                                         "InitialTop":  -3048.5369845642072,
+                                         "InitialHeight":  145.0,
+                                         "TextblockHeight":  106.0,
+                                         "Background":  "#FFC1D676"
+                                     },
+                                     {
+                                         "Id":  "7ea1c20dc7a14add923d002971ee9092",
+                                         "Title":  "패밀리 선택",
+                                         "DescriptionText":  "Description \u003cDouble click here to edit group description\u003e",
+                                         "IsExpanded":  true,
+                                         "WidthAdjustment":  0.0,
+                                         "HeightAdjustment":  0.0,
+                                         "Nodes":  [
+                                                       "2d0ce39007f74ca3a6146da2c3f8bd83"
+                                                   ],
+                                         "HasNestedGroups":  false,
+                                         "Left":  -1383.1946288496886,
+                                         "Top":  -2885.4874426647075,
+                                         "Width":  552.0,
+                                         "Height":  191.0,
+                                         "FontSize":  24.0,
+                                         "GroupStyleId":  "00000000-0000-0000-0000-000000000000",
+                                         "InitialTop":  -2826.4874426647075,
+                                         "InitialHeight":  162.0,
+                                         "TextblockHeight":  49.0,
+                                         "Background":  "#FFC1D676"
+                                     }
+                                 ],
+                 "X":  629.76570429242111,
+                 "Y":  1687.4434756259498,
+                 "Zoom":  0.50179077311728659
+             }
+}

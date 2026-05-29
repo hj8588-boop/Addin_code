@@ -1,0 +1,262 @@
+﻿{
+    "Uuid":  "416c6bff-c74b-4a6a-9938-91eb0159ac44",
+    "IsCustomNode":  false,
+    "Description":  "Pick one Revit face, DWG face, or Revit Link face and move selected family instances in Z so their bottom attaches to that face.",
+    "Name":  "최종@player_selected_face_z_attach",
+    "ElementResolver":  {
+                            "ResolutionMap":  {
+
+                                              }
+                        },
+    "Inputs":  [
+
+               ],
+    "Outputs":  [
+
+                ],
+    "Nodes":  [
+                  {
+                      "ConcreteType":  "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+                      "Id":  "380d4898a97c4ac9b67714a09fcdc288",
+                      "NodeType":  "BooleanInputNode",
+                      "Inputs":  [
+
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "1d1ca3a7995a4580974c9be8d42e9d34",
+                                          "Name":  "",
+                                          "Description":  "Boolean",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "Enables selection between True and False",
+                      "InputValue":  true
+                  },
+                  {
+                      "ConcreteType":  "PythonNodeModels.PythonNode, PythonNodeModels",
+                      "Code":  "import base64\nimport gzip\nimport io\n\npayload = \"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\"\ncode = gzip.GzipFile(fileobj=io.BytesIO(base64.b64decode(payload))).read().decode(\"utf-8\")\nnamespace = {\"IN\": IN}\nexec(compile(code, \"\u003cembedded:@selected_face_z_attach_v1.py\u003e\", \"exec\"), namespace)\nOUT = namespace.get(\"OUT\")",
+                      "Engine":  "CPython3",
+                      "EngineName":  "CPython3",
+                      "VariableInputPorts":  true,
+                      "Id":  "ef854888530c41c5b34234720a00ba6f",
+                      "NodeType":  "PythonScriptNode",
+                      "Inputs":  [
+                                     {
+                                         "Id":  "86648858d30946ccae425696d59225a0",
+                                         "Name":  "IN[0]",
+                                         "Description":  "Input #0",
+                                         "UsingDefaultValue":  false,
+                                         "Level":  2,
+                                         "UseLevels":  false,
+                                         "KeepListStructure":  false
+                                     }
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "68fdfed4dd6e41fdaa91fa2dc4c4cf0b",
+                                          "Name":  "OUT",
+                                          "Description":  "Result of the python script",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "Runs an embedded Python script."
+                  },
+                  {
+                      "ConcreteType":  "CoreNodeModels.Watch, CoreNodeModels",
+                      "WatchWidth":  50.0,
+                      "WatchHeight":  38.0,
+                      "Id":  "6e9c2e8476584a2daa2f13b8c83c8ca1",
+                      "NodeType":  "ExtensionNode",
+                      "Inputs":  [
+                                     {
+                                         "Id":  "773afac5adeb403ba8a9035961f70918",
+                                         "Name":  "",
+                                         "Description":  "Node to show output from",
+                                         "UsingDefaultValue":  false,
+                                         "Level":  2,
+                                         "UseLevels":  false,
+                                         "KeepListStructure":  false
+                                     }
+                                 ],
+                      "Outputs":  [
+                                      {
+                                          "Id":  "ae78b06feb6a48c7b372644a2014564b",
+                                          "Name":  "",
+                                          "Description":  "Node output",
+                                          "UsingDefaultValue":  false,
+                                          "Level":  2,
+                                          "UseLevels":  false,
+                                          "KeepListStructure":  false
+                                      }
+                                  ],
+                      "Replication":  "Disabled",
+                      "Description":  "Visualizes a node\u0027s output"
+                  }
+              ],
+    "Connectors":  [
+                       {
+                           "Start":  "1d1ca3a7995a4580974c9be8d42e9d34",
+                           "End":  "86648858d30946ccae425696d59225a0",
+                           "Id":  "9c84943bef9e47c692cd5a1f24ef456c",
+                           "IsHidden":  "False"
+                       },
+                       {
+                           "Start":  "68fdfed4dd6e41fdaa91fa2dc4c4cf0b",
+                           "End":  "773afac5adeb403ba8a9035961f70918",
+                           "Id":  "18dcad9513b74d9e94472651a0a70de2",
+                           "IsHidden":  "False"
+                       }
+                   ],
+    "Dependencies":  [
+
+                     ],
+    "NodeLibraryDependencies":  [
+
+                                ],
+    "Thumbnail":  "",
+    "GraphDocumentationURL":  null,
+    "ExtensionWorkspaceData":  [
+                                   {
+                                       "ExtensionGuid":  "28992e1d-abb9-417f-8b1b-05e053bee670",
+                                       "Name":  "Properties",
+                                       "Version":  "2.18",
+                                       "Data":  {
+
+                                                }
+                                   },
+                                   {
+                                       "ExtensionGuid":  "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+                                       "Name":  "Generative Design",
+                                       "Version":  "6.0",
+                                       "Data":  {
+
+                                                }
+                                   }
+                               ],
+    "Author":  "OpenAI Codex",
+    "Linting":  {
+                    "activeLinter":  "None",
+                    "activeLinterId":  "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+                    "warningCount":  0,
+                    "errorCount":  0
+                },
+    "Bindings":  [
+
+                 ],
+    "View":  {
+                 "Dynamo":  {
+                                "ScaleFactor":  1.0,
+                                "HasRunWithoutCrash":  true,
+                                "IsVisibleInDynamoLibrary":  true,
+                                "Version":  "2.18.1.5096",
+                                "RunType":  "Manual",
+                                "RunPeriod":  "1000"
+                            },
+                 "Camera":  {
+                                "Name":  "_Background Preview",
+                                "EyeX":  -17.0,
+                                "EyeY":  24.0,
+                                "EyeZ":  60.0,
+                                "LookX":  0.0,
+                                "LookY":  0.0,
+                                "LookZ":  0.0,
+                                "UpX":  0.0,
+                                "UpY":  1.0,
+                                "UpZ":  0.0
+                            },
+                 "ConnectorPins":  [
+
+                                   ],
+                 "NodeViews":  [
+                                   {
+                                       "Id":  "380d4898a97c4ac9b67714a09fcdc288",
+                                       "Name":  "재실행 버튼",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  -468.0,
+                                       "Y":  164.0
+                                   },
+                                   {
+                                       "Id":  "ef854888530c41c5b34234720a00ba6f",
+                                       "Name":  "Import Top Solid To Family Z Move Python",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  -99.683835005105834,
+                                       "Y":  65.672434998517645
+                                   },
+                                   {
+                                       "Id":  "6e9c2e8476584a2daa2f13b8c83c8ca1",
+                                       "Name":  "Watch",
+                                       "IsSetAsInput":  false,
+                                       "IsSetAsOutput":  false,
+                                       "Excluded":  false,
+                                       "ShowGeometry":  true,
+                                       "X":  327.68669371157955,
+                                       "Y":  57.45385426184464
+                                   }
+                               ],
+                 "Annotations":  [
+                                     {
+                                         "Id":  "83184e134b264973b778c955178e7954",
+                                         "Title":  "1. Select Families And Pick One Face",
+                                         "DescriptionText":  "Select one or more family instances first. Run the graph, then pick one Revit face, DWG face, or Revit Link element/face to attach the family bottoms by Z only.",
+                                         "IsExpanded":  true,
+                                         "WidthAdjustment":  0.0,
+                                         "HeightAdjustment":  0.0,
+                                         "Nodes":  [
+                                                       "380d4898a97c4ac9b67714a09fcdc288",
+                                                       "ef854888530c41c5b34234720a00ba6f"
+                                                   ],
+                                         "HasNestedGroups":  false,
+                                         "Left":  -479.0,
+                                         "Top":  105.0,
+                                         "Width":  778.31616499489417,
+                                         "Height":  191.0,
+                                         "FontSize":  0.0,
+                                         "GroupStyleId":  "00000000-0000-0000-0000-000000000000",
+                                         "InitialTop":  164.0,
+                                         "InitialHeight":  145.0,
+                                         "TextblockHeight":  92.0,
+                                         "Background":  "#FFD2E6C9"
+                                     },
+                                     {
+                                         "Id":  "5e5fbef632734e9a910b98f83a6c5fa0",
+                                         "Title":  "2. Review Result",
+                                         "DescriptionText":  "Check movedIds, moveDetails, skipped, and hostSummary here after the run.",
+                                         "IsExpanded":  true,
+                                         "WidthAdjustment":  0.0,
+                                         "HeightAdjustment":  0.0,
+                                         "Nodes":  [
+                                                       "6e9c2e8476584a2daa2f13b8c83c8ca1"
+                                                   ],
+                                         "HasNestedGroups":  false,
+                                         "Left":  317.68669371157955,
+                                         "Top":  -44.54614573815536,
+                                         "Width":  147.0,
+                                         "Height":  238.0,
+                                         "FontSize":  0.0,
+                                         "GroupStyleId":  "00000000-0000-0000-0000-000000000000",
+                                         "InitialTop":  57.45385426184464,
+                                         "InitialHeight":  145.0,
+                                         "TextblockHeight":  92.0,
+                                         "Background":  "#FFF2D38B"
+                                     }
+                                 ],
+                 "X":  452.34362035412892,
+                 "Y":  194.41468463999064,
+                 "Zoom":  0.833911143510972
+             }
+}

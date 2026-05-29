@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:m.blog.naver.com)",
+      "WebFetch(domain:blog.naver.com)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Read(//c/Users/user/**)",
+      "Bash(python -c \"import mcp; print\\('mcp OK'\\)\")",
+      "Bash(python -c \"import mcp; print\\('mcp 버전:', mcp.__version__\\)\")",
+      "Bash(python -c \"from mcp.server import Server; print\\('mcp.server OK'\\)\")",
+      "Bash(python scripts/revit_mcp_server.py --help)",
+      "Bash(python -c \"import mcp; import mcp.server.stdio; print\\(dir\\(mcp.server.stdio\\)\\)\")",
+      "Bash(pip show *)",
+      "Bash(python -m pip show mcp)"
+    ]
+  },
+  "enableAllProjectMcpServers": true
+}

@@ -1,0 +1,832 @@
+{
+  "Uuid": "9ef96cd4-72a1-4c08-815d-a39b374e8f31",
+  "IsCustomNode": false,
+  "Description": "Read shared parameter groups, select groups, and bind selected definitions to selected Revit categories.",
+  "Name": "shared_parameter_to_project_parameter",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "CoreNodeModels.Input.Filename, CoreNodeModels",
+      "Id": "f1017efabfac4899bde0424ef1cf0001",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf1001",
+          "Name": "",
+          "Description": "File Path",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows you to select a file on the system and returns its file path",
+      "HintPath": "P:\\@이혜정\\@충북선 고속화\\철도WBS표준분류체계_공유 매개변수.txt",
+      "InputValue": "P:\\@이혜정\\@충북선 고속화\\철도WBS표준분류체계_공유 매개변수.txt"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "script_path = r\"C:\\Users\\user\\Desktop\\codex\\#shared_parameter_to_project_parameter\\\\shared_parameter_group_list.py\"\nnamespace = {\"IN\": IN}\nwith open(script_path, \"r\", encoding=\"utf-8\") as handle:\n    code = handle.read()\nexec(compile(code, script_path, \"exec\"), namespace)\nOUT = namespace.get(\"OUT\")\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "f1017efabfac4899bde0424ef1cf0002",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf2001",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf3001",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "f1017efabfac4899bde0424ef1cf0004",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf1002",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "0"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "script_path = r\"C:\\Users\\user\\Desktop\\codex\\#shared_parameter_to_project_parameter\\\\shared_parameter_group_select.py\"\nnamespace = {\"IN\": IN}\nwith open(script_path, \"r\", encoding=\"utf-8\") as handle:\n    code = handle.read()\nexec(compile(code, script_path, \"exec\"), namespace)\nOUT = namespace.get(\"OUT\")\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "f1017efabfac4899bde0424ef1cf0005",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf2003",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf2004",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "cfd4b00023e1484db7799cb2f64aaa0d",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf3002",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "f1017efabfac4899bde0424ef1cf0007",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf1003",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "PG_DATA"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "Id": "f1017efabfac4899bde0424ef1cf0008",
+      "NodeType": "CodeBlockNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf1004",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly",
+      "Code": "true;"
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 293,
+      "SelectedString": "OST_LightingFixtures",
+      "Id": "f1017efabfac4899bde0424ef1cf0009",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf1005",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 212,
+      "SelectedString": "OST_ElectricalFixtures",
+      "Id": "f1017efabfac4899bde0424ef1cf0010",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf1006",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.CreateList, CoreNodeModels",
+      "VariableInputPorts": true,
+      "Id": "f1017efabfac4899bde0424ef1cf0011",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf2006",
+          "Name": "item0",
+          "Description": "Item Index #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf2007",
+          "Name": "item1",
+          "Description": "Item Index #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "b43f75e5e400457a92d9a173828ccbd5",
+          "Name": "item2",
+          "Description": "Item Index #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "e947291130594b8aaf9d739e3f163542",
+          "Name": "item3",
+          "Description": "Item Index #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ea9e45b1f999483f9b6645c3a7daf9ea",
+          "Name": "item4",
+          "Description": "Item Index #4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf3003",
+          "Name": "list",
+          "Description": "A list",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Makes a new list from the given inputs"
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "script_path = r\"C:\\Users\\user\\Desktop\\codex\\#shared_parameter_to_project_parameter\\\\shared_parameter_to_project_parameter.py\"\nnamespace = {\"IN\": IN}\nwith open(script_path, \"r\", encoding=\"utf-8\") as handle:\n    code = handle.read()\nexec(compile(code, script_path, \"exec\"), namespace)\nOUT = namespace.get(\"OUT\")\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "f1017efabfac4899bde0424ef1cf0012",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf2008",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf2009",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf2010",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf2011",
+          "Name": "IN[3]",
+          "Description": "Input #3",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf2012",
+          "Name": "IN[4]",
+          "Description": "Input #4",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "f1017efabfac4899bde0424ef1cf3004",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "WatchWidth": 200.0,
+      "WatchHeight": 200.0,
+      "Id": "1674eae9c6544ca9a5d4dda8085e08ba",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "933a0d82df3847b9b92754c65ec7c448",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "02c865f058054bce809351b9d2b3b232",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualizes a node's output"
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 108,
+      "SelectedString": "OST_CableTray",
+      "Id": "574b7638b9054fbd961472ebae560f23",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "a1851bec97c44d7e843fd79e62ef535f",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 104,
+      "SelectedString": "OST_CableTrayFitting",
+      "Id": "3f16fe3da538498a963c338e99a995e6",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "796985d17e5b4f049b5fa9ec1f420005",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "DSRevitNodesUI.Categories, DSRevitNodesUI",
+      "SelectedIndex": 208,
+      "SelectedString": "OST_ElectricalEquipment",
+      "Id": "c871e762ff4346a19645a6dd369f1c69",
+      "NodeType": "ExtensionNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "83b6e5915bf24c9c95e84e821cf431bd",
+          "Name": "Category",
+          "Description": "The selected Category.",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "All built-in categories."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "a19b5e41f230452bad76416873ef8fe7",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "c6ded706e345497a91231e552060edaa",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": false
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf1001",
+      "End": "f1017efabfac4899bde0424ef1cf2001",
+      "Id": "f1017efabfac4899bde0424ef1cf4001",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf1001",
+      "End": "f1017efabfac4899bde0424ef1cf2008",
+      "Id": "f1017efabfac4899bde0424ef1cf4006",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf3001",
+      "End": "f1017efabfac4899bde0424ef1cf2003",
+      "Id": "f1017efabfac4899bde0424ef1cf4003",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf3001",
+      "End": "933a0d82df3847b9b92754c65ec7c448",
+      "Id": "8ad5aa8ba5164c21a3fd80a9faabac9f",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf1002",
+      "End": "f1017efabfac4899bde0424ef1cf2004",
+      "Id": "dd7f6bfcd5db48ef993436c69e0a6b58",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf3002",
+      "End": "f1017efabfac4899bde0424ef1cf2012",
+      "Id": "f1017efabfac4899bde0424ef1cf4012",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf1003",
+      "End": "f1017efabfac4899bde0424ef1cf2009",
+      "Id": "f1017efabfac4899bde0424ef1cf4007",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf1004",
+      "End": "f1017efabfac4899bde0424ef1cf2010",
+      "Id": "f1017efabfac4899bde0424ef1cf4008",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf1005",
+      "End": "f1017efabfac4899bde0424ef1cf2006",
+      "Id": "f1017efabfac4899bde0424ef1cf4009",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf1006",
+      "End": "f1017efabfac4899bde0424ef1cf2007",
+      "Id": "f1017efabfac4899bde0424ef1cf4010",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "f1017efabfac4899bde0424ef1cf3003",
+      "End": "f1017efabfac4899bde0424ef1cf2011",
+      "Id": "f1017efabfac4899bde0424ef1cf4011",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "a1851bec97c44d7e843fd79e62ef535f",
+      "End": "e947291130594b8aaf9d739e3f163542",
+      "Id": "2efb965be59b4cbcb086b12b8ab23a67",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "796985d17e5b4f049b5fa9ec1f420005",
+      "End": "b43f75e5e400457a92d9a173828ccbd5",
+      "Id": "b35c609acd2f4d68b67a3267bf5a3112",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "83b6e5915bf24c9c95e84e821cf431bd",
+      "End": "ea9e45b1f999483f9b6645c3a7daf9ea",
+      "Id": "32fb7086c5574382b262446962796407",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "c6ded706e345497a91231e552060edaa",
+      "End": "cfd4b00023e1484db7799cb2f64aaa0d",
+      "Id": "47922617aee649cc9b4220ea3d4261d4",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [
+    {
+      "Name": "철도WBS표준분류체계_공유 매개변수.txt",
+      "ReferenceType": "External",
+      "Nodes": [
+        "f1017efabfac4899bde0424ef1cf0001"
+      ]
+    }
+  ],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.18",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "6.0",
+      "Data": {}
+    }
+  ],
+  "Author": "OpenAI Codex",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.18.1.5096",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 60.0,
+      "LookX": 0.0,
+      "LookY": 0.0,
+      "LookZ": 0.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf0001",
+        "Name": "File Path",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -736.24344265216257,
+        "Y": 28.8890487655205
+      },
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf0002",
+        "Name": "Group List Python",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -83.791284501998575,
+        "Y": -44.342266683177343
+      },
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf0004",
+        "Name": "Group Indexes",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -164.37161313263772,
+        "Y": 128.32484485876194
+      },
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf0005",
+        "Name": "Group Select Python",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 94.416749049150553,
+        "Y": 168.35301440826751
+      },
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf0007",
+        "Name": "Parameter Group",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -334.88018153513821,
+        "Y": 450.5727732197455
+      },
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf0008",
+        "Name": "Instance TrueFalse",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -334.88018153513821,
+        "Y": 580.5727732197455
+      },
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf0009",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -334.88018153513821,
+        "Y": 730.5727732197455
+      },
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf0010",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -336.60880116544826,
+        "Y": 860.5727732197455
+      },
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf0011",
+        "Name": "Category List",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 5.1198184648617939,
+        "Y": 780.5727732197455
+      },
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf0012",
+        "Name": "Main Import Python",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 335.11981846486185,
+        "Y": 550.5727732197455
+      },
+      {
+        "Id": "1674eae9c6544ca9a5d4dda8085e08ba",
+        "Name": "Group List Watch",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 273.6931937708049,
+        "Y": -160.2816232055801
+      },
+      {
+        "Id": "574b7638b9054fbd961472ebae560f23",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -344.78087146052223,
+        "Y": 1127.7653803540834
+      },
+      {
+        "Id": "3f16fe3da538498a963c338e99a995e6",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -340.83104016660735,
+        "Y": 992.56133140803854
+      },
+      {
+        "Id": "c871e762ff4346a19645a6dd369f1c69",
+        "Name": "Category",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -343.63139267982109,
+        "Y": 1278.3970366939268
+      },
+      {
+        "Id": "a19b5e41f230452bad76416873ef8fe7",
+        "Name": "Boolean",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -218.32573630891488,
+        "Y": 256.39208499949655
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf5001",
+        "Title": "1. Check Group List",
+        "DescriptionText": "Run once, read the indexed group names in Group List Watch, then type the wanted index values into Group Indexes.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "f1017efabfac4899bde0424ef1cf0001",
+          "f1017efabfac4899bde0424ef1cf0002",
+          "f1017efabfac4899bde0424ef1cf0004",
+          "f1017efabfac4899bde0424ef1cf0005",
+          "1674eae9c6544ca9a5d4dda8085e08ba",
+          "a19b5e41f230452bad76416873ef8fe7"
+        ],
+        "HasNestedGroups": false,
+        "Left": -746.24344265216257,
+        "Top": -210.2816232055801,
+        "Width": 1306.9366364229675,
+        "Height": 598.67370820507665,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -160.2816232055801,
+        "InitialHeight": 519.72662161314906,
+        "TextblockHeight": 40.0,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "f1017efabfac4899bde0424ef1cf5002",
+        "Title": "2. Import To Project",
+        "DescriptionText": "After confirming the group numbers above, set Group Indexes and run this section to bind the selected shared parameters.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "f1017efabfac4899bde0424ef1cf0007",
+          "f1017efabfac4899bde0424ef1cf0008",
+          "f1017efabfac4899bde0424ef1cf0009",
+          "f1017efabfac4899bde0424ef1cf0010",
+          "f1017efabfac4899bde0424ef1cf0011",
+          "f1017efabfac4899bde0424ef1cf0012",
+          "3f16fe3da538498a963c338e99a995e6",
+          "574b7638b9054fbd961472ebae560f23",
+          "c871e762ff4346a19645a6dd369f1c69"
+        ],
+        "HasNestedGroups": false,
+        "Left": -354.78087146052223,
+        "Top": 400.5727732197455,
+        "Width": 923.90068992538409,
+        "Height": 1009.8242634741813,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 450.5727732197455,
+        "InitialHeight": 555.0,
+        "TextblockHeight": 40.0,
+        "Background": "#FFF2C36B"
+      }
+    ],
+    "X": 305.59089545068258,
+    "Y": 195.80540550703182,
+    "Zoom": 0.74314776928177628
+  }
+}

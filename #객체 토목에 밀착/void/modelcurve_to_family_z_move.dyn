@@ -1,0 +1,289 @@
+{
+  "Uuid": "d4a6f6c7-b92a-4e53-a985-19c8b9b8f221",
+  "IsCustomNode": false,
+  "Description": "Move selected family instances in Z using either one selected ModelCurve or the nearest ModelCurve found automatically.",
+  "Name": "modelcurve_to_family_z_move",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "Id": "b1000000000000000000000000000001",
+      "NodeType": "CodeBlockNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "b1000000000000000000000000001001",
+          "Name": "",
+          "Description": "Value of expression at line 1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Allows for DesignScript code to be authored directly",
+      "Code": "5000;"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "b1000000000000000000000000000002",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "b1000000000000000000000000001002",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": false
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "from pathlib import Path\n\nscript_name = \"move_family_to_modelcurve_z.py\"\nroot_path = Path(r\"C:\\Users\\user\\Desktop\\codex\")\ncandidate_paths = [\n    root_path / \"#workplane_family_to_nearest_wall\" / script_name,\n    root_path / script_name,\n]\n\nscript_path = None\nfor candidate in candidate_paths:\n    if candidate.exists():\n        script_path = candidate\n        break\n\nif script_path is None:\n    matches = list(root_path.rglob(script_name))\n    if matches:\n        script_path = matches[0]\n\nif script_path is None:\n    raise FileNotFoundError(\"Could not find {0} under {1}\".format(script_name, root_path))\n\nnamespace = {\"IN\": IN}\nwith open(str(script_path), \"r\", encoding=\"utf-8\") as handle:\n    code = handle.read()\nexec(compile(code, str(script_path), \"exec\"), namespace)\nOUT = namespace.get(\"OUT\")\n",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "b1000000000000000000000000000003",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "b1000000000000000000000000002001",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "b1000000000000000000000000002002",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "b1000000000000000000000000003001",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "WatchWidth": 638.0,
+      "WatchHeight": 634.0,
+      "Id": "7ac3d4889ecd4a648537f05e0a919b27",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "858ec7c3fd2a40168265e2cf5470d7ac",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "1f6bff90e3cc4976956385459d1db7bc",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualizes a node's output"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "b1000000000000000000000000001001",
+      "End": "b1000000000000000000000000002001",
+      "Id": "b1000000000000000000000000005001",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "b1000000000000000000000000001002",
+      "End": "b1000000000000000000000000002002",
+      "Id": "b1000000000000000000000000005002",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "b1000000000000000000000000003001",
+      "End": "858ec7c3fd2a40168265e2cf5470d7ac",
+      "Id": "d0b3366c88c1480c9288f3c26d044350",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.18",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "6.0",
+      "Data": {}
+    }
+  ],
+  "Author": "OpenAI Codex",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.18.1.5096",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 60.0,
+      "LookX": 0.0,
+      "LookY": 0.0,
+      "LookZ": 0.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "b1000000000000000000000000000001",
+        "Name": "Max Search Distance Mm",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -469.0,
+        "Y": 26.0
+      },
+      {
+        "Id": "b1000000000000000000000000000002",
+        "Name": "Reserved Toggle",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -468.0,
+        "Y": 164.0
+      },
+      {
+        "Id": "b1000000000000000000000000000003",
+        "Name": "ModelCurve To Family Z Move Python",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -71.0,
+        "Y": 74.0
+      },
+      {
+        "Id": "7ac3d4889ecd4a648537f05e0a919b27",
+        "Name": "Watch",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 327.68669371157955,
+        "Y": 57.45385426184464
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "b1000000000000000000000000006001",
+        "Title": "1. Select Families And Optional ModelCurve",
+        "DescriptionText": "Select one or more family instances. You may also select exactly one ModelCurve. If no ModelCurve is selected, the script searches for the nearest ModelCurve automatically, first in the active view and then in the whole document.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "b1000000000000000000000000000001",
+          "b1000000000000000000000000000002",
+          "b1000000000000000000000000000003"
+        ],
+        "HasNestedGroups": false,
+        "Left": -479.0,
+        "Top": -33.0,
+        "Width": 727.0,
+        "Height": 329.0,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 26.0,
+        "InitialHeight": 283.0,
+        "TextblockHeight": 49.0,
+        "Background": "#FFD2E6C9"
+      }
+      ,
+      {
+        "Id": "4f6e157e-df0c-44eb-95a0-c0ef17fbc001",
+        "Title": "2. Review Result",
+        "DescriptionText": "Check movedIds, moveDetails, skipped, and hostSummary here after the run.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "7ac3d4889ecd4a648537f05e0a919b27"
+        ],
+        "HasNestedGroups": false,
+        "Left": 300.0,
+        "Top": -33.0,
+        "Width": 430.0,
+        "Height": 329.0,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": 26.0,
+        "InitialHeight": 283.0,
+        "TextblockHeight": 49.0,
+        "Background": "#FFF2D38B"
+      }
+    ],
+    "X": -38.169984986908617,
+    "Y": 176.329552771581,
+    "Zoom": 0.671641308021891
+  }
+}

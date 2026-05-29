@@ -1,0 +1,288 @@
+{
+  "Uuid": "1d5cf5d9-85aa-4eeb-8ec4-72c9f40a4216",
+  "IsCustomNode": false,
+  "Description": "Select Room/Space elements and one Lighting Fixture instance, then calculate required fixture counts and export the results to CSV for Excel.",
+  "Name": "선택@lighting_fixture_required_count",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "CoreNodeModels.Input.BoolSelector, CoreNodeModels",
+      "Id": "54b1683421dc4cc5875e91d514bb9d6b",
+      "NodeType": "BooleanInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "95b5aa7e2d9546e4bf4fc6ce57147b4a",
+          "Name": "",
+          "Description": "Boolean",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Enables selection between True and False",
+      "InputValue": true
+    },
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "Code": "import io\n\nscript_path = r\"C:\\Users\\user\\Desktop\\codex\\#조도계산서\\@lighting_fixture_required_count.py\"\nwith io.open(script_path, \"r\", encoding=\"utf-8\") as script_file:\n    script = script_file.read()\nnamespace = {\"IN\": IN, \"__file__\": script_path}\nexec(compile(script, script_path, \"exec\"), namespace)\nOUT = namespace.get(\"OUT\")",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "bea14bc8d6af497a80d3d845dca218ba",
+      "NodeType": "PythonScriptNode",
+      "Inputs": [
+        {
+          "Id": "11aa85af0de84ba58fc66c01df01be08",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "ce7f4097e56f4db3a44bdb124c12f75d",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "8205a0602b234571b9e8f6e3a7b24d08",
+          "Name": "OUT",
+          "Description": "Result of the python script",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Runs an embedded Python script."
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Input.StringInput, CoreNodeModels",
+      "Id": "6e977eaec9464724a8f50a4ff58f9927",
+      "NodeType": "StringInputNode",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "6958ec2fbbf0459d8c31a0347cc76dd0",
+          "Name": "",
+          "Description": "String",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Creates a string",
+      "InputValue": "C:\\Users\\user\\Desktop\\codex\\#조도계산서\\exports"
+    },
+    {
+      "ConcreteType": "CoreNodeModels.Watch, CoreNodeModels",
+      "WatchWidth": 796.0,
+      "WatchHeight": 569.0,
+      "Id": "a45a7905afdb49c5b87eb98833486cda",
+      "NodeType": "ExtensionNode",
+      "Inputs": [
+        {
+          "Id": "945ba792d9de48a7b067c31fdcb92b79",
+          "Name": "",
+          "Description": "Node to show output from",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "d34fa31a74c7455aa48fd7e03e4cf57b",
+          "Name": "",
+          "Description": "Node output",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Visualizes a node's output"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "95b5aa7e2d9546e4bf4fc6ce57147b4a",
+      "End": "11aa85af0de84ba58fc66c01df01be08",
+      "Id": "2812a1b932e340f8a8d798468126bca1",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "8205a0602b234571b9e8f6e3a7b24d08",
+      "End": "945ba792d9de48a7b067c31fdcb92b79",
+      "Id": "ca4f4f52b01f4861a8d17c6e4d92a6fe",
+      "IsHidden": "False"
+    },
+    {
+      "Start": "6958ec2fbbf0459d8c31a0347cc76dd0",
+      "End": "ce7f4097e56f4db3a44bdb124c12f75d",
+      "Id": "4cfd1f9c9e0a497da85cda7bc29f8724",
+      "IsHidden": "False"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Thumbnail": "",
+  "GraphDocumentationURL": null,
+  "ExtensionWorkspaceData": [
+    {
+      "ExtensionGuid": "28992e1d-abb9-417f-8b1b-05e053bee670",
+      "Name": "Properties",
+      "Version": "2.18",
+      "Data": {}
+    },
+    {
+      "ExtensionGuid": "DFBD9CC0-DB40-457A-939E-8C8555555A9D",
+      "Name": "Generative Design",
+      "Version": "6.0",
+      "Data": {}
+    }
+  ],
+  "Author": "OpenAI Codex",
+  "Linting": {
+    "activeLinter": "None",
+    "activeLinterId": "7b75fb44-43fd-4631-a878-29f4d5d8399a",
+    "warningCount": 0,
+    "errorCount": 0
+  },
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": true,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.18.1.5096",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "_Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 60.0,
+      "LookX": 0.0,
+      "LookY": 0.0,
+      "LookZ": 0.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "54b1683421dc4cc5875e91d514bb9d6b",
+        "Name": "재실행 버튼",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -451.0,
+        "Y": 45.0
+      },
+      {
+        "Id": "bea14bc8d6af497a80d3d845dca218ba",
+        "Name": "Lighting Fixture Required Count Python",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -78.0,
+        "Y": -6.0
+      },
+      {
+        "Id": "6e977eaec9464724a8f50a4ff58f9927",
+        "Name": "추출 경로",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": -500.25529817735122,
+        "Y": 193.13118120690979
+      },
+      {
+        "Id": "a45a7905afdb49c5b87eb98833486cda",
+        "Name": "Watch",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "ShowGeometry": true,
+        "X": 344.091717763583,
+        "Y": -30.0
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "0ac2ae70c02b41cb97fe51d73f7b3942",
+        "Title": "1. Select Rooms And One Lighting Fixture",
+        "DescriptionText": "Revit에서 Room 또는 Space 여러 개와 기준 Lighting Fixture 인스턴스 1개를 함께 선택합니다. Room에는 조도_요구조도_lx, 조도_조명율, 조도_보수율, 조도_반사율 파라미터가 있어야 합니다.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "54b1683421dc4cc5875e91d514bb9d6b",
+          "bea14bc8d6af497a80d3d845dca218ba",
+          "6e977eaec9464724a8f50a4ff58f9927"
+        ],
+        "HasNestedGroups": false,
+        "Left": -510.25529817735122,
+        "Top": -65.0,
+        "Width": 811.25529817735128,
+        "Height": 431.13118120690979,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -6.0,
+        "InitialHeight": 289.0,
+        "TextblockHeight": 49.0,
+        "Background": "#FFD2E6C9"
+      },
+      {
+        "Id": "74f0b3d08fc0472ba66567cf3b824e12",
+        "Title": "2. Review Result And Export",
+        "DescriptionText": "Watch에서 각 Room의 계산 결과와 exportCsvPath를 확인합니다. 실행이 끝나면 exports 폴더에 Excel에서 바로 열 수 있는 CSV가 저장됩니다.",
+        "IsExpanded": true,
+        "WidthAdjustment": 0.0,
+        "HeightAdjustment": 0.0,
+        "Nodes": [
+          "a45a7905afdb49c5b87eb98833486cda"
+        ],
+        "HasNestedGroups": false,
+        "Left": 334.091717763583,
+        "Top": -80.0,
+        "Width": 892.99999999999989,
+        "Height": 717.0,
+        "FontSize": 0.0,
+        "GroupStyleId": "00000000-0000-0000-0000-000000000000",
+        "InitialTop": -30.0,
+        "InitialHeight": 145.0,
+        "TextblockHeight": 40.0,
+        "Background": "#FFF2D38B"
+      }
+    ],
+    "X": -184.67528573962187,
+    "Y": -23.20529568028735,
+    "Zoom": 0.81428939376261122
+  }
+}

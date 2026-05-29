@@ -1,0 +1,106 @@
+{
+  "Uuid": "a1b2c3d4-0001-0001-0001-000000000001",
+  "IsCustomNode": false,
+  "Description": "전기 장비 패밀리 추출",
+  "Name": "전기장비_패밀리추출",
+  "ElementResolver": { "ResolutionMap": {} },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "import clr\r\nclr.AddReference('RevitAPI')\r\nclr.AddReference('RevitServices')\r\nfrom RevitServices.Persistence import DocumentManager\r\nfrom Autodesk.Revit.DB import *\r\nimport csv, os\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\n\r\n# 전기 관련 카테고리 ID (Revit 내장)\r\nELEC_CATS = [\r\n    BuiltInCategory.OST_ElectricalEquipment,\r\n    BuiltInCategory.OST_ElectricalFixtures,\r\n    BuiltInCategory.OST_LightingFixtures,\r\n    BuiltInCategory.OST_LightingDevices,\r\n    BuiltInCategory.OST_DataDevices,\r\n    BuiltInCategory.OST_FireAlarmDevices,\r\n    BuiltInCategory.OST_NurseCallDevices,\r\n    BuiltInCategory.OST_SecurityDevices,\r\n    BuiltInCategory.OST_TelephoneDevices,\r\n    BuiltInCategory.OST_CommunicationDevices,\r\n]\r\n\r\nresults = []\r\nall_families = set()\r\n\r\nfor cat in ELEC_CATS:\r\n    try:\r\n        cat_filter = ElementCategoryFilter(cat)\r\n        collector = FilteredElementCollector(doc).WherePasses(cat_filter).WhereElementIsNotElementType()\r\n        for elem in collector:\r\n            fam_inst = elem\r\n            try:\r\n                fam_sym = doc.GetElement(fam_inst.GetTypeId())\r\n                if fam_sym is None:\r\n                    continue\r\n                fam = fam_sym.Family if hasattr(fam_sym, 'Family') else None\r\n                fam_name = fam.Name if fam else 'Unknown'\r\n                type_name = fam_sym.get_Parameter(BuiltInParameter.SYMBOL_NAME_PARAM)\r\n                type_str = type_name.AsString() if type_name else 'Unknown'\r\n                cat_name = elem.Category.Name if elem.Category else 'Unknown'\r\n                key = (cat_name, fam_name, type_str)\r\n                if key not in all_families:\r\n                    all_families.add(key)\r\n                    results.append({'카테고리': cat_name, '패밀리명': fam_name, '유형명': type_str})\r\n            except:\r\n                pass\r\n    except:\r\n        pass\r\n\r\nresults.sort(key=lambda x: (x['카테고리'], x['패밀리명'], x['유형명']))\r\n\r\n# CSV 저장\r\nout_dir = os.path.dirname(doc.PathName)\r\nout_path = os.path.join(out_dir, '전기장비_패밀리목록.csv')\r\nwith open(out_path, 'w', newline='', encoding='utf-8-sig') as f:\r\n    writer = csv.DictWriter(f, fieldnames=['카테고리','패밀리명','유형명'])\r\n    writer.writeheader()\r\n    writer.writerows(results)\r\n\r\nOUT = [out_path, results]",
+      "Engine": "CPython3",
+      "EngineName": "CPython3",
+      "VariableInputPorts": true,
+      "Id": "19e23e23-aaf1-407b-9cb1-7648a1731308",
+      "Inputs": [],
+      "Outputs": [
+        { "Id": "98c12f11-9f3b-4510-8bca-c92c21795d36", "Name": "OUT", "Description": "Result" }
+      ],
+      "Replication": "Disabled",
+      "Description": "전기 장비 패밀리 추출 및 CSV 저장",
+      "IsSetAsInput": false,
+      "IsSetAsOutput": false,
+      "ExcludeFromDynamoLibrary": false,
+      "X": 200.0,
+      "Y": 200.0
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
+      "NodeType": "CodeBlockNode",
+      "Code": "x[0];",
+      "Id": "13cc2242-01d2-42e2-b7e0-1fd13df552eb",
+      "Inputs": [
+        { "Id": "a0000001-0000-0000-0000-000000000001", "Name": "x", "Description": "x" }
+      ],
+      "Outputs": [
+        { "Id": "a0000002-0000-0000-0000-000000000002", "Name": "", "Description": "Value of expression" }
+      ],
+      "Replication": "Disabled",
+      "Description": "저장 경로 출력",
+      "X": 600.0,
+      "Y": 200.0
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "98c12f11-9f3b-4510-8bca-c92c21795d36",
+      "End": "a0000001-0000-0000-0000-000000000001",
+      "Id": "conn-001"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": false,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.19.0.0",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "Background Preview",
+      "EyeX": -17.0,
+      "EyeY": 24.0,
+      "EyeZ": 50.0,
+      "LookX": 12.0,
+      "LookY": -13.0,
+      "LookZ": -58.0,
+      "UpX": 0.0,
+      "UpY": 1.0,
+      "UpZ": 0.0
+    },
+    "ConnectorPins": [],
+    "NodeViews": [
+      {
+        "Id": "19e23e23-aaf1-407b-9cb1-7648a1731308",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Name": "Python Script",
+        "ShowGeometry": true,
+        "Excluded": false,
+        "X": 200.0,
+        "Y": 200.0
+      },
+      {
+        "Id": "13cc2242-01d2-42e2-b7e0-1fd13df552eb",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Name": "Code Block",
+        "ShowGeometry": true,
+        "Excluded": false,
+        "X": 600.0,
+        "Y": 200.0
+      }
+    ],
+    "Annotations": [],
+    "X": 0.0,
+    "Y": 0.0,
+    "Zoom": 1.0
+  }
+}
