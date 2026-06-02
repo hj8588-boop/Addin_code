@@ -1,14 +1,11 @@
-#visual studi
 .vs/
-#build
-bin/
-obj/
-#user
-*.user
-*.suo
-#build out put
+
+**/bin/
+**/obj/
+
 *.dll
 *.pdb
-#cache
+
+*.user
+*.suo
 *.cache
-#log
