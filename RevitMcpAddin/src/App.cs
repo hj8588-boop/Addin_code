@@ -22,7 +22,7 @@ namespace RevitMcpAddin
             RibbonPanel panel = GetOrCreatePanel(application, tabName, "Claude MCP");
 
             var button = new PushButtonData(
-                "McpStatus",
+                "RevitMcpStatus",
                 "Claude\nMCP",
                 assemblyPath,
                 typeof(McpStatusCommand).FullName);
