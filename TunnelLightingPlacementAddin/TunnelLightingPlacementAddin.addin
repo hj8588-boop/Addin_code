@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Tunnel Lighting Placement</Name>
+    <Assembly>%APPDATA%\Autodesk\Revit\Addins\2024\TunnelLightingPlacementAddin\TunnelLightingPlacementAddin.dll</Assembly>
+    <AddInId>2D33F327-A0D3-4977-A412-649A81F87B21</AddInId>
+    <FullClassName>TunnelLightingPlacementAddin.App</FullClassName>
+    <VendorId>CODEX</VendorId>
+    <VendorDescription>Tunnel centerline based lighting fixture placement</VendorDescription>
+  </AddIn>
+</RevitAddIns>
