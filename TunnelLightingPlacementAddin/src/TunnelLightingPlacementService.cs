@@ -23,6 +23,77 @@ namespace TunnelLightingPlacementAddin
             return locationCurve == null ? null : locationCurve.Curve;
         }
 
+        public static Curve GetCurveFromReference(Document document, Reference reference)
+        {
+            if (document == null || reference == null)
+                return null;
+
+            Element element = document.GetElement(reference.ElementId);
+            if (element == null)
+                return null;
+
+            GeometryObject geometryObject = null;
+            try
+            {
+                geometryObject = element.GetGeometryObjectFromReference(reference);
+            }
+            catch
+            {
+                geometryObject = null;
+            }
+
+            Curve curve = GetCurveFromGeometryObject(geometryObject, reference.GlobalPoint);
+            return curve ?? GetCurveFromElement(element);
+        }
+
+        private static Curve GetCurveFromGeometryObject(GeometryObject geometryObject, XYZ pickedPoint)
+        {
+            if (geometryObject == null)
+                return null;
+
+            Curve curve = geometryObject as Curve;
+            if (curve != null)
+                return curve;
+
+            Edge edge = geometryObject as Edge;
+            if (edge != null)
+                return edge.AsCurve();
+
+            PolyLine polyLine = geometryObject as PolyLine;
+            if (polyLine != null)
+                return GetNearestPolyLineSegment(polyLine, pickedPoint);
+
+            return null;
+        }
+
+        private static Curve GetNearestPolyLineSegment(PolyLine polyLine, XYZ pickedPoint)
+        {
+            IList<XYZ> points = polyLine.GetCoordinates();
+            if (points == null || points.Count < 2)
+                return null;
+
+            Curve bestCurve = null;
+            double bestDistance = double.MaxValue;
+
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                if (points[i].DistanceTo(points[i + 1]) < 1e-9)
+                    continue;
+
+                Line line = Line.CreateBound(points[i], points[i + 1]);
+                IntersectionResult projection = pickedPoint == null ? null : line.Project(pickedPoint);
+                double distance = projection == null ? 0.0 : projection.XYZPoint.DistanceTo(pickedPoint);
+
+                if (bestCurve == null || distance < bestDistance)
+                {
+                    bestCurve = line;
+                    bestDistance = distance;
+                }
+            }
+
+            return bestCurve;
+        }
+
         public static int PlaceFixtures(Document document, Curve centerline, PlacementSettings settings)
         {
             FamilySymbol symbol = document.GetElement(settings.FamilySymbolId) as FamilySymbol;
