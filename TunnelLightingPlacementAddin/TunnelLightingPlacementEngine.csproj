@@ -42,12 +42,12 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\EngineEntry.cs" />
+    <Compile Include="src\EngineEntryHotSwap.cs" />
     <Compile Include="src\FamilySymbolListItem.cs" />
     <Compile Include="src\PlacementSettings.cs" />
-    <Compile Include="src\TunnelCenterlineSelectionFilter.cs" />
+    <Compile Include="src\TunnelCenterlineSelectionFilterV2.cs" />
     <Compile Include="src\TunnelLightingPlacementForm.cs" />
-    <Compile Include="src\TunnelLightingPlacementService.cs" />
+    <Compile Include="src\TunnelLightingPlacementServiceV2.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

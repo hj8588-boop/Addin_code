@@ -14,6 +14,7 @@ namespace TunnelLightingPlacementAddin
         public double EndDistanceMm { get; set; }
         public double SpacingMm { get; set; }
         public PlacementSide Side { get; set; }
+        public bool PlaceOnSelectedLine { get; set; }
         public double OffsetMm { get; set; }
         public double HeightMm { get; set; }
         public string SegmentName { get; set; }

@@ -29,18 +29,19 @@ namespace TunnelLightingPlacementAddin
             {
                 Reference picked = uiDocument.Selection.PickObject(
                     Autodesk.Revit.UI.Selection.ObjectType.PointOnElement,
-                    new TunnelCenterlineSelectionFilter(document),
-                    "터널 중심선 Model Line 또는 Curve 요소를 선택하세요.");
+                    new TunnelCenterlineSelectionFilterV2(document),
+                    "터널 중심선으로 사용할 Model Line, 그룹 내부 선, Generic Model edge를 선택하세요.");
 
-                Curve centerline = TunnelLightingPlacementService.GetCurveFromReference(document, picked);
+                Curve centerline = TunnelLightingPlacementServiceV2.GetCurveFromReference(document, picked);
                 if (centerline == null)
                 {
-                    TaskDialog.Show("터널 전등 자동배치", "선택한 요소에서 Curve를 읽을 수 없습니다.");
+                    TaskDialog.Show("터널 전등 자동배치", "선택한 객체에서 Curve를 읽을 수 없습니다.");
                     return Result.Cancelled;
                 }
 
-                int placedCount = TunnelLightingPlacementService.PlaceFixtures(document, centerline, settings);
-                TaskDialog.Show("터널 전등 자동배치", placedCount + "개의 등기구를 배치했습니다.");
+                settings.PlaceOnSelectedLine = true;
+                int placedCount = TunnelLightingPlacementServiceV2.PlaceFixtures(document, centerline, settings);
+                TaskDialog.Show("터널 전등 자동배치", placedCount + "개의 등기구를 선택한 선 위에 배치했습니다.");
                 return Result.Succeeded;
             }
             catch (OperationCanceledException)

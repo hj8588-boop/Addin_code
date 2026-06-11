@@ -3,33 +3,33 @@ using Autodesk.Revit.UI.Selection;
 
 namespace TunnelLightingPlacementAddin
 {
-    public class TunnelCenterlineSelectionFilter : ISelectionFilter
+    public class TunnelCenterlineSelectionFilterV2 : ISelectionFilter
     {
         private readonly Document _document;
 
-        public TunnelCenterlineSelectionFilter(Document document)
+        public TunnelCenterlineSelectionFilterV2(Document document)
         {
             _document = document;
         }
 
         public bool AllowElement(Element elem)
         {
-            if (TunnelLightingPlacementService.GetCurveFromElement(elem) != null)
+            if (TunnelLightingPlacementServiceV2.GetCurveFromElement(elem) != null)
                 return true;
 
             Category category = elem == null ? null : elem.Category;
             if (category == null)
                 return false;
 
-            return category.Id.IntegerValue == (int)BuiltInCategory.OST_GenericModel
-                || category.Id.IntegerValue == (int)BuiltInCategory.OST_IOSModelGroups
+            return category.Id.Value == (long)BuiltInCategory.OST_GenericModel
+                || category.Id.Value == (long)BuiltInCategory.OST_IOSModelGroups
                 || elem is FamilyInstance
                 || elem is Group;
         }
 
         public bool AllowReference(Reference reference, XYZ position)
         {
-            return TunnelLightingPlacementService.GetCurveFromReference(_document, reference) != null;
+            return TunnelLightingPlacementServiceV2.GetCurveFromReference(_document, reference) != null;
         }
     }
 }
