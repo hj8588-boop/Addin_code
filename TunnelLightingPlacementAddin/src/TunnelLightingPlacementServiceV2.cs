@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 
@@ -28,8 +29,14 @@ namespace TunnelLightingPlacementAddin
             if (document == null || reference == null)
                 return null;
 
+            Curve linkedCurve = GetCurveFromLinkedReference(document, reference);
+            if (linkedCurve != null)
+                return linkedCurve;
+
             Element element = document.GetElement(reference.ElementId);
             if (element == null)
+                return null;
+            if (element is RevitLinkInstance)
                 return null;
 
             GeometryObject geometryObject = null;
@@ -46,6 +53,154 @@ namespace TunnelLightingPlacementAddin
             curve = TransformCurveIfCloser(element, curve, reference.GlobalPoint);
             curve = AlignCurveNearPickedPoint(curve, reference.GlobalPoint);
             return curve ?? GetCurveFromElement(element);
+        }
+
+        public static string GetReferenceDebugInfo(Document document, Reference reference)
+        {
+            var text = new StringBuilder();
+            text.AppendLine("Host ElementId: " + (reference == null ? "(null)" : reference.ElementId.ToString()));
+            text.AppendLine("LinkedElementId: " + (reference == null ? "(null)" : reference.LinkedElementId.ToString()));
+            text.AppendLine("GlobalPoint: " + FormatPoint(reference == null ? null : reference.GlobalPoint));
+
+            Element hostElement = document == null || reference == null ? null : document.GetElement(reference.ElementId);
+            text.AppendLine("Host Type: " + (hostElement == null ? "(null)" : hostElement.GetType().FullName));
+            text.AppendLine("Host Category: " + GetCategoryName(hostElement));
+
+            RevitLinkInstance linkInstance = hostElement as RevitLinkInstance;
+            if (linkInstance != null && reference.LinkedElementId != ElementId.InvalidElementId)
+            {
+                Document linkedDocument = linkInstance.GetLinkDocument();
+                Element linkedElement = linkedDocument == null ? null : linkedDocument.GetElement(reference.LinkedElementId);
+                text.AppendLine("Linked Doc: " + (linkedDocument == null ? "(null)" : linkedDocument.Title));
+                text.AppendLine("Linked Type: " + (linkedElement == null ? "(null)" : linkedElement.GetType().FullName));
+                text.AppendLine("Linked Category: " + GetCategoryName(linkedElement));
+                text.AppendLine("Linked Name: " + (linkedElement == null ? "(null)" : linkedElement.Name));
+                text.AppendLine("Linked CurveElement: " + (linkedElement is CurveElement));
+                text.AppendLine("Linked LocationCurve: " + (linkedElement != null && linkedElement.Location is LocationCurve));
+            }
+
+            Curve curve = GetCurveFromReference(document, reference);
+            text.AppendLine("Curve Found: " + (curve != null));
+            if (curve != null)
+            {
+                text.AppendLine("Curve Start: " + FormatPoint(curve.GetEndPoint(0)));
+                text.AppendLine("Curve End: " + FormatPoint(curve.GetEndPoint(1)));
+            }
+
+            return text.ToString();
+        }
+
+        private static string GetCategoryName(Element element)
+        {
+            Category category = element == null ? null : element.Category;
+            return category == null ? "(null)" : category.Name;
+        }
+
+        private static string FormatPoint(XYZ point)
+        {
+            if (point == null)
+                return "(null)";
+
+            return point.X.ToString("0.###", CultureInfo.InvariantCulture)
+                + ", "
+                + point.Y.ToString("0.###", CultureInfo.InvariantCulture)
+                + ", "
+                + point.Z.ToString("0.###", CultureInfo.InvariantCulture);
+        }
+
+        private static Curve GetCurveFromLinkedReference(Document document, Reference reference)
+        {
+            if (reference.LinkedElementId == ElementId.InvalidElementId)
+                return null;
+
+            RevitLinkInstance linkInstance = document.GetElement(reference.ElementId) as RevitLinkInstance;
+            if (linkInstance == null)
+                return null;
+
+            Document linkedDocument = linkInstance.GetLinkDocument();
+            if (linkedDocument == null)
+                return null;
+
+            Element linkedElement = linkedDocument.GetElement(reference.LinkedElementId);
+            if (linkedElement == null)
+                return null;
+
+            Transform linkTransform = GetBestLinkTransform(linkInstance, reference.GlobalPoint, GetCurveFromElement(linkedElement));
+            XYZ linkedPickedPoint = GetInversePoint(linkTransform, reference.GlobalPoint);
+            Curve curve = GetCurveFromElement(linkedElement);
+            if (curve == null)
+                curve = GetCurveFromLinkedGeometry(linkedElement, reference, linkedPickedPoint);
+            if (curve == null)
+                return null;
+
+            curve = TransformCurveIfCloser(linkedElement, curve, linkedPickedPoint);
+            linkTransform = GetBestLinkTransform(linkInstance, reference.GlobalPoint, curve);
+            return curve.CreateTransformed(linkTransform);
+        }
+
+        private static Curve GetCurveFromLinkedGeometry(Element linkedElement, Reference reference, XYZ linkedPickedPoint)
+        {
+            GeometryObject geometryObject = null;
+            try
+            {
+                Reference linkedReference = reference.CreateReferenceInLink();
+                geometryObject = linkedElement.GetGeometryObjectFromReference(linkedReference);
+            }
+            catch
+            {
+                geometryObject = null;
+            }
+
+            return GetCurveFromGeometryObject(geometryObject, linkedPickedPoint);
+        }
+
+        private static Transform GetBestLinkTransform(RevitLinkInstance linkInstance, XYZ pickedPoint, Curve linkedCurve)
+        {
+            Transform instanceTransform = linkInstance.GetTransform();
+            Transform totalTransform = linkInstance.GetTotalTransform();
+            if (linkedCurve == null || pickedPoint == null)
+                return totalTransform ?? instanceTransform ?? Transform.Identity;
+
+            Transform bestTransform = totalTransform ?? instanceTransform ?? Transform.Identity;
+            double bestDistance = DistanceToTransformedCurve(linkedCurve, bestTransform, pickedPoint);
+
+            double instanceDistance = DistanceToTransformedCurve(linkedCurve, instanceTransform, pickedPoint);
+            if (instanceDistance < bestDistance)
+            {
+                bestTransform = instanceTransform;
+            }
+
+            return bestTransform;
+        }
+
+        private static double DistanceToTransformedCurve(Curve curve, Transform transform, XYZ point)
+        {
+            if (curve == null || transform == null)
+                return double.MaxValue;
+
+            try
+            {
+                return DistanceToCurve(curve.CreateTransformed(transform), point);
+            }
+            catch
+            {
+                return double.MaxValue;
+            }
+        }
+
+        private static XYZ GetInversePoint(Transform transform, XYZ point)
+        {
+            if (transform == null || point == null)
+                return point;
+
+            try
+            {
+                return transform.Inverse.OfPoint(point);
+            }
+            catch
+            {
+                return point;
+            }
         }
 
         public static int PlaceFixtures(Document document, Curve centerline, PlacementSettings settings)

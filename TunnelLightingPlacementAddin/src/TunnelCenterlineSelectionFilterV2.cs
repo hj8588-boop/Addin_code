@@ -14,6 +14,9 @@ namespace TunnelLightingPlacementAddin
 
         public bool AllowElement(Element elem)
         {
+            if (elem is RevitLinkInstance)
+                return true;
+
             if (TunnelLightingPlacementServiceV2.GetCurveFromElement(elem) != null)
                 return true;
 
@@ -29,6 +32,12 @@ namespace TunnelLightingPlacementAddin
 
         public bool AllowReference(Reference reference, XYZ position)
         {
+            Element element = _document == null || reference == null
+                ? null
+                : _document.GetElement(reference.ElementId);
+            if (element is RevitLinkInstance)
+                return true;
+
             return TunnelLightingPlacementServiceV2.GetCurveFromReference(_document, reference) != null;
         }
     }

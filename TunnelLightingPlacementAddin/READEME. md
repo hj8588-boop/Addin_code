@@ -1,0 +1,18 @@
+# TunnelLightingPlacementAddin
+
+## 목적
+터널 중심선 또는 Model Line을 선택해서 등기구 패밀리를 자동 배치한다.
+
+## 주요 기능
+- 등기구 패밀리 타입 선택
+- 시작/종료 거리 입력
+- 간격 입력
+- 선택한 선 위에 자동 배치
+- Engine DLL hot-swap 지원
+
+## 주요 파일
+- src/App.cs: Revit 리본 버튼 생성
+- src/Command.cs: Loader, Engine DLL 로드
+- src/EngineEntryHotSwap.cs: 명령 실행 흐름
+- src/TunnelLightingPlacementServiceV2.cs: 실제 배치 계산
+- deploy/hot_swap_engine_revit2024.ps1: Revit 재시작 없이 Engine DLL 교체
