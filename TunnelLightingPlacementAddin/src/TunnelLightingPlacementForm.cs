@@ -200,7 +200,8 @@ namespace TunnelLightingPlacementAddin
             box.Dock = DockStyle.Fill;
             box.Minimum = minimum;
             box.Maximum = maximum;
-            box.DecimalPlaces = 3;
+            box.DecimalPlaces = 0;
+            box.Increment = 1;
             box.ThousandsSeparator = true;
             box.Value = value;
             layout.Controls.Add(box, 1, row);

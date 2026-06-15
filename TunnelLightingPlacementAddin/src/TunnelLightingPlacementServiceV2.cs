@@ -245,7 +245,7 @@ namespace TunnelLightingPlacementAddin
                         continue;
 
                     XYZ placementPoint = settings.PlaceOnSelectedLine
-                        ? pathPoint.Point
+                        ? GetHeightPoint(pathPoint.Point, settings)
                         : GetOffsetPoint(pathPoint.Point, tangent, settings);
 
                     FamilyInstance instance = document.Create.NewFamilyInstance(
@@ -386,6 +386,12 @@ namespace TunnelLightingPlacementAddin
             double offset = settings.OffsetMm * FeetPerMm;
             double height = settings.HeightMm * FeetPerMm;
             return basePoint + lateral.Multiply(offset) + XYZ.BasisZ.Multiply(height);
+        }
+
+        private static XYZ GetHeightPoint(XYZ basePoint, PlacementSettings settings)
+        {
+            double height = settings.HeightMm * FeetPerMm;
+            return basePoint + XYZ.BasisZ.Multiply(height);
         }
 
         private static void MoveInstanceToPoint(Document document, FamilyInstance instance, XYZ targetPoint)
