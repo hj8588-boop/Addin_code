@@ -59,6 +59,8 @@ namespace TunnelLightingPlacementAddin
                 }
 
                 int placedCount = TunnelLightingPlacementServiceV2.PlaceFixtures(document, centerlines, settings, preferredDirection);
+                if (placedCount < 0)
+                    return Result.Cancelled;
 
                 TaskDialog.Show("터널 전등 자동배치", centerlines.Count + "개의 선택 선에 " + placedCount + "개의 조명기구를 배치했습니다.");
                 return Result.Succeeded;

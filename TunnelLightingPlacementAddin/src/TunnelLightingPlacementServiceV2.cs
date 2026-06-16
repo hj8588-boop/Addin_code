@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
+using Autodesk.Revit.UI;
 
 namespace TunnelLightingPlacementAddin
 {
@@ -283,6 +284,13 @@ namespace TunnelLightingPlacementAddin
                     placed++;
                 }
 
+                document.Regenerate();
+                if (placed > 0 && !ConfirmPlacementPreview(placed))
+                {
+                    transaction.RollBack();
+                    return -1;
+                }
+
                 transaction.Commit();
             }
 
@@ -431,6 +439,16 @@ namespace TunnelLightingPlacementAddin
                 return;
 
             ElementTransformUtils.MoveElement(document, instance.Id, offsetVector);
+        }
+
+        private static bool ConfirmPlacementPreview(int placedCount)
+        {
+            var dialog = new TaskDialog("터널 전등 자동배치");
+            dialog.MainInstruction = "배치 미리보기를 확인하세요.";
+            dialog.MainContent = placedCount + "개의 조명기구가 임시 배치되었습니다.\n현재 위치와 회전이 맞으면 '예'를 누르고, 취소하려면 '아니오'를 누르세요.";
+            dialog.CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No;
+            dialog.DefaultButton = TaskDialogResult.Yes;
+            return dialog.Show() == TaskDialogResult.Yes;
         }
 
         private static List<PathSegment> BuildPath(IList<Curve> curves, XYZ preferredDirection)
