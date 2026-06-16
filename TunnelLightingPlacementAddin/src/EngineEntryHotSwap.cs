@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.Exceptions;
 using Autodesk.Revit.UI;
@@ -15,15 +16,6 @@ namespace TunnelLightingPlacementAddin
             {
                 TaskDialog.Show("터널 전등 자동배치", "Revit 문서를 먼저 열어주세요.");
                 return Result.Cancelled;
-            }
-
-            PlacementSettings settings;
-            using (var form = new TunnelLightingPlacementForm(document))
-            {
-                if (form.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-                    return Result.Cancelled;
-
-                settings = form.Settings;
             }
 
             try
@@ -58,9 +50,41 @@ namespace TunnelLightingPlacementAddin
                     return Result.Cancelled;
                 }
 
-                int placedCount = TunnelLightingPlacementServiceV2.PlaceFixtures(document, centerlines, settings, preferredDirection);
-                if (placedCount < 0)
-                    return Result.Cancelled;
+                var previewIds = new List<ElementId>();
+                PlacementSettings settings;
+                bool keepPreview = false;
+
+                using (var form = new TunnelLightingPlacementForm(document))
+                {
+                    form.PreviewPlacement = previewSettings =>
+                    {
+                        TunnelLightingPlacementServiceV2.DeletePreviewFixtures(document, previewIds);
+                        previewIds = TunnelLightingPlacementServiceV2
+                            .PreviewFixtures(document, centerlines, previewSettings, preferredDirection)
+                            .ToList();
+                        return previewIds.Count;
+                    };
+
+                    if (form.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                    {
+                        TunnelLightingPlacementServiceV2.DeletePreviewFixtures(document, previewIds);
+                        return Result.Cancelled;
+                    }
+
+                    settings = form.Settings;
+                    keepPreview = form.PreviewIsCurrent && previewIds.Count > 0;
+                }
+
+                int placedCount;
+                if (keepPreview)
+                {
+                    placedCount = previewIds.Count;
+                }
+                else
+                {
+                    TunnelLightingPlacementServiceV2.DeletePreviewFixtures(document, previewIds);
+                    placedCount = TunnelLightingPlacementServiceV2.PlaceFixtures(document, centerlines, settings, preferredDirection);
+                }
 
                 TaskDialog.Show("터널 전등 자동배치", centerlines.Count + "개의 선택 선에 " + placedCount + "개의 조명기구를 배치했습니다.");
                 return Result.Succeeded;

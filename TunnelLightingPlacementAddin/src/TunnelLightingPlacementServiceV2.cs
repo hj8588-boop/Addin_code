@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Text;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
-using Autodesk.Revit.UI;
 
 namespace TunnelLightingPlacementAddin
 {
@@ -226,6 +225,37 @@ namespace TunnelLightingPlacementAddin
 
         public static int PlaceFixtures(Document document, IList<Curve> centerlines, PlacementSettings settings, XYZ preferredDirection)
         {
+            return PlaceFixturesAndReturnIds(document, centerlines, settings, preferredDirection, "터널 전등 자동배치").Count;
+        }
+
+        public static IList<ElementId> PreviewFixtures(Document document, IList<Curve> centerlines, PlacementSettings settings, XYZ preferredDirection)
+        {
+            return PlaceFixturesAndReturnIds(document, centerlines, settings, preferredDirection, "터널 전등 자동배치 미리보기");
+        }
+
+        public static void DeletePreviewFixtures(Document document, IList<ElementId> elementIds)
+        {
+            if (document == null || elementIds == null || elementIds.Count == 0)
+                return;
+
+            using (var transaction = new Transaction(document, "터널 전등 미리보기 삭제"))
+            {
+                transaction.Start();
+                foreach (ElementId elementId in elementIds)
+                {
+                    if (elementId == null || elementId == ElementId.InvalidElementId)
+                        continue;
+
+                    Element element = document.GetElement(elementId);
+                    if (element != null)
+                        document.Delete(elementId);
+                }
+                transaction.Commit();
+            }
+        }
+
+        private static IList<ElementId> PlaceFixturesAndReturnIds(Document document, IList<Curve> centerlines, PlacementSettings settings, XYZ preferredDirection, string transactionName)
+        {
             FamilySymbol symbol = document.GetElement(settings.FamilySymbolId) as FamilySymbol;
             if (symbol == null)
                 throw new InvalidOperationException("선택한 등기구 패밀리 타입을 찾을 수 없습니다.");
@@ -247,8 +277,8 @@ namespace TunnelLightingPlacementAddin
             if (end < start)
                 throw new InvalidOperationException("종료 거리는 시작 거리보다 커야 합니다.");
 
-            int placed = 0;
-            using (var transaction = new Transaction(document, "터널 전등 자동배치"))
+            var placedIds = new List<ElementId>();
+            using (var transaction = new Transaction(document, transactionName))
             {
                 transaction.Start();
 
@@ -281,20 +311,14 @@ namespace TunnelLightingPlacementAddin
                     RotateAroundZ(document, instance, tangent);
                     document.Regenerate();
                     RotateByUserAngle(document, instance, settings.RotationAngleDegrees);
-                    placed++;
+                    placedIds.Add(instance.Id);
                 }
 
                 document.Regenerate();
-                if (placed > 0 && !ConfirmPlacementPreview(placed))
-                {
-                    transaction.RollBack();
-                    return -1;
-                }
-
                 transaction.Commit();
             }
 
-            return placed;
+            return placedIds;
         }
 
         private static Curve GetCurveFromGeometryObject(GeometryObject geometryObject, XYZ pickedPoint)
@@ -439,16 +463,6 @@ namespace TunnelLightingPlacementAddin
                 return;
 
             ElementTransformUtils.MoveElement(document, instance.Id, offsetVector);
-        }
-
-        private static bool ConfirmPlacementPreview(int placedCount)
-        {
-            var dialog = new TaskDialog("터널 전등 자동배치");
-            dialog.MainInstruction = "배치 미리보기를 확인하세요.";
-            dialog.MainContent = placedCount + "개의 조명기구가 임시 배치되었습니다.\n현재 위치와 회전이 맞으면 '예'를 누르고, 취소하려면 '아니오'를 누르세요.";
-            dialog.CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No;
-            dialog.DefaultButton = TaskDialogResult.Yes;
-            return dialog.Show() == TaskDialogResult.Yes;
         }
 
         private static List<PathSegment> BuildPath(IList<Curve> curves, XYZ preferredDirection)
