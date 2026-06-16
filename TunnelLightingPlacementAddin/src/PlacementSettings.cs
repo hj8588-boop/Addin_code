@@ -17,6 +17,7 @@ namespace TunnelLightingPlacementAddin
         public bool PlaceOnSelectedLine { get; set; }
         public double OffsetMm { get; set; }
         public double HeightMm { get; set; }
+        public double RotationAngleDegrees { get; set; }
         public string SegmentName { get; set; }
         public string StationParameterName { get; set; }
         public string SegmentParameterName { get; set; }

@@ -258,8 +258,7 @@ namespace TunnelLightingPlacementAddin
                     document.Regenerate();
                     RotateAroundZ(document, instance, tangent);
                     document.Regenerate();
-                    if (settings.PlaceOnSelectedLine)
-                        MoveInstanceVisualCenterToPoint(document, instance, placementPoint);
+                    RotateByUserAngle(document, instance, settings.RotationAngleDegrees);
                     WriteParameters(instance, settings, distance / FeetPerMm);
                     placed++;
                 }
@@ -407,32 +406,6 @@ namespace TunnelLightingPlacementAddin
             ElementTransformUtils.MoveElement(document, instance.Id, moveVector);
         }
 
-        private static void MoveInstanceVisualCenterToPoint(Document document, FamilyInstance instance, XYZ targetPoint)
-        {
-            if (instance == null || targetPoint == null)
-                return;
-
-            BoundingBoxXYZ box = instance.get_BoundingBox(null);
-            LocationPoint locationPoint = instance.Location as LocationPoint;
-            if (box == null || locationPoint == null)
-                return;
-
-            XYZ visualCenter = new XYZ(
-                (box.Min.X + box.Max.X) * 0.5,
-                (box.Min.Y + box.Max.Y) * 0.5,
-                (box.Min.Z + box.Max.Z) * 0.5);
-
-            XYZ moveVector = new XYZ(
-                targetPoint.X - visualCenter.X,
-                targetPoint.Y - visualCenter.Y,
-                targetPoint.Z - locationPoint.Point.Z);
-
-            if (moveVector.GetLength() < 1e-8)
-                return;
-
-            ElementTransformUtils.MoveElement(document, instance.Id, moveVector);
-        }
-
         private static List<PathSegment> BuildPath(Curve curve)
         {
             IList<XYZ> points = curve.Tessellate();
@@ -501,6 +474,21 @@ namespace TunnelLightingPlacementAddin
             XYZ pivot = ((LocationPoint)instance.Location).Point;
             Line axis = Line.CreateBound(pivot, pivot + XYZ.BasisZ);
             ElementTransformUtils.RotateElement(document, instance.Id, axis, angle);
+        }
+
+        private static void RotateByUserAngle(Document document, FamilyInstance instance, double angleDegrees)
+        {
+            if (Math.Abs(angleDegrees) < 1e-8)
+                return;
+
+            LocationPoint locationPoint = instance == null ? null : instance.Location as LocationPoint;
+            if (locationPoint == null)
+                return;
+
+            double angleRadians = angleDegrees * Math.PI / 180.0;
+            XYZ pivot = locationPoint.Point;
+            Line axis = Line.CreateBound(pivot, pivot + XYZ.BasisZ);
+            ElementTransformUtils.RotateElement(document, instance.Id, axis, angleRadians);
         }
 
         private static XYZ FlattenAndNormalize(XYZ vector)

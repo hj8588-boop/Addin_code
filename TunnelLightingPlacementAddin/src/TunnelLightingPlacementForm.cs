@@ -16,6 +16,7 @@ namespace TunnelLightingPlacementAddin
         private readonly ComboBox _sideComboBox = new ComboBox();
         private readonly NumericUpDown _offsetBox = new NumericUpDown();
         private readonly NumericUpDown _heightBox = new NumericUpDown();
+        private readonly NumericUpDown _rotationAngleBox = new NumericUpDown();
         private readonly TextBox _segmentNameBox = new TextBox();
         private readonly TextBox _stationParameterBox = new TextBox();
         private readonly TextBox _segmentParameterBox = new TextBox();
@@ -45,7 +46,7 @@ namespace TunnelLightingPlacementAddin
             layout.Dock = DockStyle.Fill;
             layout.Padding = new Padding(14);
             layout.ColumnCount = 2;
-            layout.RowCount = 15;
+            layout.RowCount = 16;
             layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150F));
             layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
@@ -74,13 +75,15 @@ namespace TunnelLightingPlacementAddin
             AddTextRow(layout, "Offset 파라미터명", _offsetParameterBox, 11, "중심선Offset");
             AddTextRow(layout, "높이 파라미터명", _heightParameterBox, 12, "설치높이");
 
+            AddNumberRow(layout, "회전각도(도)", _rotationAngleBox, 13, -360, 360, 180);
+
             var note = new Label();
             note.Text = "확인을 누른 뒤 Revit 화면에서 터널 중심선 Model Line 또는 Curve 요소를 선택합니다.";
             note.Dock = DockStyle.Fill;
             note.ForeColor = System.Drawing.Color.FromArgb(75, 75, 75);
             note.TextAlign = ContentAlignment.MiddleLeft;
             note.AutoSize = true;
-            layout.Controls.Add(note, 0, 13);
+            layout.Controls.Add(note, 0, 14);
             layout.SetColumnSpan(note, 2);
 
             var buttonPanel = new FlowLayoutPanel();
@@ -99,7 +102,7 @@ namespace TunnelLightingPlacementAddin
 
             buttonPanel.Controls.Add(okButton);
             buttonPanel.Controls.Add(cancelButton);
-            layout.Controls.Add(buttonPanel, 0, 14);
+            layout.Controls.Add(buttonPanel, 0, 15);
             layout.SetColumnSpan(buttonPanel, 2);
 
             Controls.Add(layout);
@@ -148,6 +151,7 @@ namespace TunnelLightingPlacementAddin
                 Side = GetSelectedSide(),
                 OffsetMm = (double)_offsetBox.Value,
                 HeightMm = (double)_heightBox.Value,
+                RotationAngleDegrees = (double)_rotationAngleBox.Value,
                 SegmentName = _segmentNameBox.Text,
                 StationParameterName = _stationParameterBox.Text,
                 SegmentParameterName = _segmentParameterBox.Text,
