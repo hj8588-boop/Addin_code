@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.Exceptions;
 using Autodesk.Revit.UI;
@@ -27,21 +28,39 @@ namespace TunnelLightingPlacementAddin
 
             try
             {
-                Reference picked = uiDocument.Selection.PickObject(
+                IList<Reference> pickedReferences = uiDocument.Selection.PickObjects(
                     Autodesk.Revit.UI.Selection.ObjectType.PointOnElement,
                     new TunnelCenterlineSelectionFilterV2(document),
-                    "터널 중심선으로 사용할 Model Line, 그룹 내부 선, Generic Model edge를 선택하세요.");
+                    "터널 중심선으로 사용할 Model Line, 그룹 내부 선, Generic Model edge를 여러 개 선택하세요.");
 
-                Curve centerline = TunnelLightingPlacementServiceV2.GetCurveFromReference(document, picked);
-                if (centerline == null)
+                if (pickedReferences == null || pickedReferences.Count == 0)
                 {
-                    TaskDialog.Show("터널 전등 자동배치", "선택한 객체에서 Curve를 읽을 수 없습니다.");
+                    TaskDialog.Show("터널 전등 자동배치", "선택된 선이 없습니다.");
                     return Result.Cancelled;
                 }
 
-                settings.PlaceOnSelectedLine = true;
-                int placedCount = TunnelLightingPlacementServiceV2.PlaceFixtures(document, centerline, settings);
-                TaskDialog.Show("터널 전등 자동배치", placedCount + "개의 등기구를 선택한 선 위에 배치했습니다.");
+                var centerlines = new List<Curve>();
+                XYZ preferredDirection = null;
+                foreach (Reference picked in pickedReferences)
+                {
+                    Curve centerline = TunnelLightingPlacementServiceV2.GetCurveFromReference(document, picked);
+                    if (centerline == null)
+                        continue;
+
+                    centerlines.Add(centerline);
+                    if (preferredDirection == null)
+                        preferredDirection = TunnelLightingPlacementServiceV2.GetCurveDirection(centerline);
+                }
+
+                if (centerlines.Count == 0)
+                {
+                    TaskDialog.Show("터널 전등 자동배치", "선택한 객체에서 배치 기준 Curve를 읽을 수 없습니다.");
+                    return Result.Cancelled;
+                }
+
+                int placedCount = TunnelLightingPlacementServiceV2.PlaceFixtures(document, centerlines, settings, preferredDirection);
+
+                TaskDialog.Show("터널 전등 자동배치", centerlines.Count + "개의 선택 선에 " + placedCount + "개의 조명기구를 배치했습니다.");
                 return Result.Succeeded;
             }
             catch (OperationCanceledException)

@@ -203,13 +203,33 @@ namespace TunnelLightingPlacementAddin
             }
         }
 
+        public static XYZ GetCurveDirection(Curve curve)
+        {
+            if (curve == null)
+                return null;
+
+            return GetPointListDirection(curve.Tessellate());
+        }
+
         public static int PlaceFixtures(Document document, Curve centerline, PlacementSettings settings)
+        {
+            return PlaceFixtures(document, centerline, settings, null);
+        }
+
+        public static int PlaceFixtures(Document document, Curve centerline, PlacementSettings settings, XYZ preferredDirection)
+        {
+            var centerlines = new List<Curve>();
+            centerlines.Add(centerline);
+            return PlaceFixtures(document, centerlines, settings, preferredDirection);
+        }
+
+        public static int PlaceFixtures(Document document, IList<Curve> centerlines, PlacementSettings settings, XYZ preferredDirection)
         {
             FamilySymbol symbol = document.GetElement(settings.FamilySymbolId) as FamilySymbol;
             if (symbol == null)
                 throw new InvalidOperationException("선택한 등기구 패밀리 타입을 찾을 수 없습니다.");
 
-            List<PathSegment> path = BuildPath(centerline);
+            List<PathSegment> path = BuildPath(centerlines, preferredDirection);
             if (path.Count == 0)
                 throw new InvalidOperationException("중심선 길이를 계산할 수 없습니다.");
 
@@ -244,9 +264,8 @@ namespace TunnelLightingPlacementAddin
                     if (tangent == null)
                         continue;
 
-                    XYZ placementPoint = settings.PlaceOnSelectedLine
-                        ? GetHeightPoint(pathPoint.Point, settings)
-                        : GetOffsetPoint(pathPoint.Point, tangent, settings);
+                    XYZ placementPoint = GetHeightPoint(pathPoint.Point, settings);
+                    XYZ offsetVector = GetOffsetVector(tangent, settings);
 
                     FamilyInstance instance = document.Create.NewFamilyInstance(
                         placementPoint,
@@ -256,10 +275,11 @@ namespace TunnelLightingPlacementAddin
                     document.Regenerate();
                     MoveInstanceToPoint(document, instance, placementPoint);
                     document.Regenerate();
+                    MoveInstanceByOffset(document, instance, offsetVector);
+                    document.Regenerate();
                     RotateAroundZ(document, instance, tangent);
                     document.Regenerate();
                     RotateByUserAngle(document, instance, settings.RotationAngleDegrees);
-                    WriteParameters(instance, settings, distance / FeetPerMm);
                     placed++;
                 }
 
@@ -379,18 +399,17 @@ namespace TunnelLightingPlacementAddin
             return bestCurve;
         }
 
-        private static XYZ GetOffsetPoint(XYZ basePoint, XYZ tangent, PlacementSettings settings)
-        {
-            XYZ lateral = GetLateralDirection(tangent, settings.Side);
-            double offset = settings.OffsetMm * FeetPerMm;
-            double height = settings.HeightMm * FeetPerMm;
-            return basePoint + lateral.Multiply(offset) + XYZ.BasisZ.Multiply(height);
-        }
-
         private static XYZ GetHeightPoint(XYZ basePoint, PlacementSettings settings)
         {
             double height = settings.HeightMm * FeetPerMm;
             return basePoint + XYZ.BasisZ.Multiply(height);
+        }
+
+        private static XYZ GetOffsetVector(XYZ tangent, PlacementSettings settings)
+        {
+            XYZ lateral = XYZ.BasisZ.CrossProduct(tangent).Normalize();
+            double offset = settings.OffsetMm * FeetPerMm;
+            return lateral.Multiply(offset);
         }
 
         private static void MoveInstanceToPoint(Document document, FamilyInstance instance, XYZ targetPoint)
@@ -406,11 +425,50 @@ namespace TunnelLightingPlacementAddin
             ElementTransformUtils.MoveElement(document, instance.Id, moveVector);
         }
 
-        private static List<PathSegment> BuildPath(Curve curve)
+        private static void MoveInstanceByOffset(Document document, FamilyInstance instance, XYZ offsetVector)
         {
-            IList<XYZ> points = curve.Tessellate();
+            if (instance == null || offsetVector == null || offsetVector.GetLength() < 1e-8)
+                return;
+
+            ElementTransformUtils.MoveElement(document, instance.Id, offsetVector);
+        }
+
+        private static List<PathSegment> BuildPath(IList<Curve> curves, XYZ preferredDirection)
+        {
+            var result = new List<PathSegment>();
+            if (curves == null)
+                return result;
+
+            double cumulative = 0.0;
+            foreach (Curve curve in curves)
+            {
+                if (curve == null)
+                    continue;
+
+                AddCurveToPath(result, curve, preferredDirection, ref cumulative);
+            }
+
+            return result;
+        }
+
+        private static List<PathSegment> BuildPath(Curve curve, XYZ preferredDirection)
+        {
             var result = new List<PathSegment>();
             double cumulative = 0.0;
+            AddCurveToPath(result, curve, preferredDirection, ref cumulative);
+            return result;
+        }
+
+        private static void AddCurveToPath(List<PathSegment> result, Curve curve, XYZ preferredDirection, ref double cumulative)
+        {
+            if (result == null || curve == null)
+                return;
+
+            var points = new List<XYZ>(curve.Tessellate());
+            XYZ curveDirection = GetPointListDirection(points);
+            XYZ preferredFlat = FlattenAndNormalize(preferredDirection);
+            if (curveDirection != null && preferredFlat != null && curveDirection.DotProduct(preferredFlat) < 0.0)
+                points.Reverse();
 
             for (int i = 0; i < points.Count - 1; i++)
             {
@@ -423,8 +481,21 @@ namespace TunnelLightingPlacementAddin
                 result.Add(new PathSegment(start, end, cumulative, cumulative + length));
                 cumulative += length;
             }
+        }
 
-            return result;
+        private static XYZ GetPointListDirection(IList<XYZ> points)
+        {
+            if (points == null || points.Count < 2)
+                return null;
+
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                XYZ direction = FlattenAndNormalize(points[i + 1] - points[i]);
+                if (direction != null)
+                    return direction;
+            }
+
+            return null;
         }
 
         private static PathPoint EvaluatePath(List<PathSegment> path, double distance)
@@ -446,17 +517,6 @@ namespace TunnelLightingPlacementAddin
             }
 
             return path[path.Count - 1].Evaluate(1.0);
-        }
-
-        private static XYZ GetLateralDirection(XYZ tangent, PlacementSide side)
-        {
-            if (side == PlacementSide.Left)
-                return XYZ.BasisZ.CrossProduct(tangent).Normalize();
-
-            if (side == PlacementSide.Right)
-                return tangent.CrossProduct(XYZ.BasisZ).Normalize();
-
-            return XYZ.Zero;
         }
 
         private static void RotateAroundZ(Document document, FamilyInstance instance, XYZ targetX)
@@ -506,56 +566,6 @@ namespace TunnelLightingPlacementAddin
             double angle = Math.Acos(dot);
             double crossZ = from.X * to.Y - from.Y * to.X;
             return crossZ < 0 ? -angle : angle;
-        }
-
-        private static void WriteParameters(FamilyInstance instance, PlacementSettings settings, double stationMm)
-        {
-            string sideText = GetSideText(settings.Side);
-            SetParameter(instance, settings.StationParameterName, FormatStation(stationMm), stationMm);
-            SetParameter(instance, settings.SegmentParameterName, settings.SegmentName ?? string.Empty, 0.0);
-            SetParameter(instance, settings.DirectionParameterName, sideText, 0.0);
-            SetParameter(instance, settings.OffsetParameterName, settings.OffsetMm.ToString("0.###", CultureInfo.InvariantCulture), settings.OffsetMm);
-            SetParameter(instance, settings.HeightParameterName, settings.HeightMm.ToString("0.###", CultureInfo.InvariantCulture), settings.HeightMm);
-        }
-
-        private static void SetParameter(Element element, string parameterName, string textValue, double numericMmValue)
-        {
-            if (string.IsNullOrWhiteSpace(parameterName))
-                return;
-
-            Parameter parameter = element.LookupParameter(parameterName.Trim());
-            if (parameter == null || parameter.IsReadOnly)
-                return;
-
-            switch (parameter.StorageType)
-            {
-                case StorageType.String:
-                    parameter.Set(textValue ?? string.Empty);
-                    break;
-                case StorageType.Double:
-                    parameter.Set(numericMmValue * FeetPerMm);
-                    break;
-                case StorageType.Integer:
-                    parameter.Set((int)Math.Round(numericMmValue));
-                    break;
-            }
-        }
-
-        private static string FormatStation(double stationMm)
-        {
-            double stationM = stationMm / 1000.0;
-            int km = (int)Math.Floor(stationM / 1000.0);
-            double meter = stationM - km * 1000.0;
-            return km.ToString(CultureInfo.InvariantCulture) + "+" + meter.ToString("000.000", CultureInfo.InvariantCulture);
-        }
-
-        private static string GetSideText(PlacementSide side)
-        {
-            if (side == PlacementSide.Left)
-                return "Left";
-            if (side == PlacementSide.Right)
-                return "Right";
-            return "Center";
         }
 
         private class PathSegment
