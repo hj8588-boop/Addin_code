@@ -15,6 +15,7 @@ namespace TunnelCableTrayPlacementAddin
     public class TunnelCableTrayPlacementForm : System.Windows.Forms.Form
     {
         private const string SettingsFileName = "TunnelCableTrayPlacementForm.settings";
+        private const string SettingsVersion = "2";
         private static readonly DrawingColor WindowBackColor = DrawingColor.FromArgb(245, 247, 250);
         private static readonly DrawingColor PanelBackColor = DrawingColor.White;
         private static readonly DrawingColor PrimaryColor = DrawingColor.FromArgb(14, 116, 144);
@@ -100,7 +101,7 @@ namespace TunnelCableTrayPlacementAddin
             AddNumberRow(layout, "종료 거리(mm)", _endDistanceBox, 2, 0, 100000000, 0);
             AddNumberRow(layout, "구간 길이(mm)", _segmentLengthBox, 3, 100, 1000000, 3000);
             AddNumberRow(layout, "좌우 Offset(mm)", _offsetBox, 4, -1000000, 1000000, 0);
-            AddNumberRow(layout, "설치 높이(mm)", _elevationBox, 5, -1000000, 1000000, 1200);
+            AddNumberRow(layout, "설치 높이(mm)", _elevationBox, 5, -1000000, 1000000, 0);
             AddNumberRow(layout, "트레이 폭(mm)", _widthBox, 6, 1, 1000000, 300);
             AddNumberRow(layout, "트레이 높이(mm)", _heightBox, 7, 1, 1000000, 100);
 
@@ -158,11 +159,12 @@ namespace TunnelCableTrayPlacementAddin
                 return;
 
             Dictionary<string, string> values = ReadSettingsFile(path);
+            bool currentSettingsVersion = GetString(values, "SettingsVersion") == SettingsVersion;
             SetNumberValue(_startDistanceBox, GetDouble(values, "StartDistanceMm", (double)_startDistanceBox.Value));
             SetNumberValue(_endDistanceBox, GetDouble(values, "EndDistanceMm", (double)_endDistanceBox.Value));
             SetNumberValue(_segmentLengthBox, GetDouble(values, "SegmentLengthMm", (double)_segmentLengthBox.Value));
-            SetNumberValue(_offsetBox, GetDouble(values, "OffsetMm", (double)_offsetBox.Value));
-            SetNumberValue(_elevationBox, GetDouble(values, "ElevationMm", (double)_elevationBox.Value));
+            SetNumberValue(_offsetBox, currentSettingsVersion ? GetDouble(values, "OffsetMm", (double)_offsetBox.Value) : 0.0);
+            SetNumberValue(_elevationBox, currentSettingsVersion ? GetDouble(values, "ElevationMm", (double)_elevationBox.Value) : 0.0);
             SetNumberValue(_widthBox, GetDouble(values, "WidthMm", (double)_widthBox.Value));
             SetNumberValue(_heightBox, GetDouble(values, "HeightMm", (double)_heightBox.Value));
 
@@ -251,6 +253,7 @@ namespace TunnelCableTrayPlacementAddin
         private void SaveSettings(CableTrayTypeListItem selectedType)
         {
             var lines = new List<string>();
+            lines.Add("SettingsVersion=" + SettingsVersion);
             lines.Add("CableTrayTypeUniqueId=" + selectedType.Type.UniqueId);
             lines.Add("StartDistanceMm=" + FormatDouble(Settings.StartDistanceMm));
             lines.Add("EndDistanceMm=" + FormatDouble(Settings.EndDistanceMm));
@@ -322,6 +325,12 @@ namespace TunnelCableTrayPlacementAddin
             return double.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out parsed)
                 ? parsed
                 : fallback;
+        }
+
+        private static string GetString(Dictionary<string, string> values, string key)
+        {
+            string rawValue;
+            return values.TryGetValue(key, out rawValue) ? rawValue : null;
         }
 
         private static string FormatDouble(double value)

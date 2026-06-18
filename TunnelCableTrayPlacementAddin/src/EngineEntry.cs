@@ -35,18 +35,24 @@ namespace TunnelCableTrayPlacementAddin
                 XYZ preferredDirection = null;
                 foreach (Reference picked in pickedReferences)
                 {
-                    Curve centerline = TunnelCableTrayPlacementService.GetCurveFromReference(document, picked);
-                    if (centerline == null)
-                        continue;
+                    IList<Curve> pickedCurves = TunnelCableTrayPlacementService.GetCurvesFromReference(document, picked);
+                    foreach (Curve centerline in pickedCurves)
+                    {
+                        if (centerline == null)
+                            continue;
 
-                    centerlines.Add(centerline);
-                    if (preferredDirection == null)
-                        preferredDirection = TunnelCableTrayPlacementService.GetCurveDirection(centerline);
+                        centerlines.Add(centerline);
+                        if (preferredDirection == null)
+                            preferredDirection = TunnelCableTrayPlacementService.GetCurveDirection(centerline);
+                    }
                 }
 
                 if (centerlines.Count == 0)
                 {
-                    TaskDialog.Show("터널 케이블 트레이 자동배치", "선택한 객체에서 배치 기준 Curve를 읽을 수 없습니다.");
+                    TaskDialog.Show(
+                        "터널 케이블 트레이 자동배치",
+                        "선택한 객체에서 배치 기준 Curve를 읽을 수 없습니다.\n\n"
+                        + TunnelCableTrayPlacementService.DescribeReferences(document, pickedReferences));
                     return Result.Cancelled;
                 }
 
