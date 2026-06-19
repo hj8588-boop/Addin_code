@@ -36,7 +36,11 @@ namespace TunnelCableTrayPlacementAddin
                 foreach (Reference picked in pickedReferences)
                 {
                     IList<Curve> pickedCurves = TunnelCableTrayPlacementService.GetCurvesFromReference(document, picked);
-                    foreach (Curve centerline in pickedCurves)
+                    IList<Curve> centerlineCurves = TunnelCableTrayPlacementService.IsDwgReference(document, picked)
+                        ? TunnelCableTrayPlacementService.CreateModelLinesFromCurves(document, pickedCurves)
+                        : pickedCurves;
+
+                    foreach (Curve centerline in centerlineCurves)
                     {
                         if (centerline == null)
                             continue;

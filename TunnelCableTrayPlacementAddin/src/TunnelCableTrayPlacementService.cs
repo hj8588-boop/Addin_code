@@ -118,6 +118,47 @@ namespace TunnelCableTrayPlacementAddin
             return curves;
         }
 
+        public static bool IsDwgReference(Document document, Reference reference)
+        {
+            if (document == null || reference == null)
+                return false;
+
+            return document.GetElement(reference.ElementId) is ImportInstance;
+        }
+
+        public static IList<Curve> CreateModelLinesFromCurves(Document document, IList<Curve> curves)
+        {
+            var modelLineCurves = new List<Curve>();
+            if (document == null || curves == null || curves.Count == 0)
+                return modelLineCurves;
+
+            using (var transaction = new Transaction(document, "DWG 기준선 모델라인 생성"))
+            {
+                transaction.Start();
+
+                foreach (Curve curve in curves)
+                {
+                    foreach (Curve modelCurveInput in GetModelLineInputCurves(curve))
+                    {
+                        try
+                        {
+                            SketchPlane sketchPlane = CreateSketchPlaneForCurve(document, modelCurveInput);
+                            ModelCurve modelCurve = document.Create.NewModelCurve(modelCurveInput, sketchPlane);
+                            if (modelCurve != null && modelCurve.GeometryCurve != null)
+                                modelLineCurves.Add(modelCurve.GeometryCurve);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+
+                transaction.Commit();
+            }
+
+            return modelLineCurves;
+        }
+
         public static string DescribeReferences(Document document, IList<Reference> references)
         {
             if (document == null || references == null || references.Count == 0)
@@ -482,6 +523,48 @@ namespace TunnelCableTrayPlacementAddin
             }
 
             return curves;
+        }
+
+        private static IList<Curve> GetModelLineInputCurves(Curve curve)
+        {
+            var curves = new List<Curve>();
+            if (curve == null || curve.Length <= MinCreatedCurveLength)
+                return curves;
+
+            if (curve is Line || curve is Arc)
+            {
+                curves.Add(curve);
+                return curves;
+            }
+
+            IList<XYZ> points = curve.Tessellate();
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                if (points[i].DistanceTo(points[i + 1]) <= MinCreatedCurveLength)
+                    continue;
+
+                curves.Add(Line.CreateBound(points[i], points[i + 1]));
+            }
+
+            return curves;
+        }
+
+        private static SketchPlane CreateSketchPlaneForCurve(Document document, Curve curve)
+        {
+            XYZ start = curve.GetEndPoint(0);
+            XYZ end = curve.GetEndPoint(1);
+            XYZ direction = (end - start).Normalize();
+            XYZ normal = Math.Abs(start.Z - end.Z) < 1e-6
+                ? XYZ.BasisZ
+                : direction.CrossProduct(XYZ.BasisZ);
+
+            if (normal.GetLength() < 1e-9)
+                normal = direction.CrossProduct(XYZ.BasisX);
+            if (normal.GetLength() < 1e-9)
+                normal = XYZ.BasisZ;
+
+            Plane plane = Plane.CreateByNormalAndOrigin(normal.Normalize(), start);
+            return SketchPlane.Create(document, plane);
         }
 
         private static IList<Curve> GetLongestCurves(IList<Curve> curves, int count)
