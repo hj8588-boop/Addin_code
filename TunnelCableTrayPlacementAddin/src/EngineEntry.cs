@@ -14,7 +14,7 @@ namespace TunnelCableTrayPlacementAddin
             Document document = uiDocument == null ? null : uiDocument.Document;
             if (document == null)
             {
-                TaskDialog.Show("터널 케이블 트레이 자동배치", "Revit 문서를 먼저 열어주세요.");
+                TaskDialog.Show("Tunnel Cable Tray Placement", "Revit 문서를 먼저 열어주세요.");
                 return Result.Cancelled;
             }
 
@@ -27,7 +27,7 @@ namespace TunnelCableTrayPlacementAddin
 
                 if (pickedReferences == null || pickedReferences.Count == 0)
                 {
-                    TaskDialog.Show("터널 케이블 트레이 자동배치", "선택된 선이 없습니다.");
+                    TaskDialog.Show("Tunnel Cable Tray Placement", "선택된 선이 없습니다.");
                     return Result.Cancelled;
                 }
 
@@ -50,7 +50,7 @@ namespace TunnelCableTrayPlacementAddin
                 if (centerlines.Count == 0)
                 {
                     TaskDialog.Show(
-                        "터널 케이블 트레이 자동배치",
+                        "Tunnel Cable Tray Placement",
                         "선택한 객체에서 배치 기준 Curve를 읽을 수 없습니다.\n\n"
                         + TunnelCableTrayPlacementService.DescribeReferences(document, pickedReferences));
                     return Result.Cancelled;
@@ -92,7 +92,9 @@ namespace TunnelCableTrayPlacementAddin
                     placedCount = TunnelCableTrayPlacementService.PlaceTrays(document, centerlines, settings, preferredDirection);
                 }
 
-                TaskDialog.Show("터널 케이블 트레이 자동배치", centerlines.Count + "개의 선택 선에 " + placedCount + "개의 케이블 트레이를 배치했습니다.");
+                TaskDialog.Show(
+                    "Tunnel Cable Tray Placement",
+                    centerlines.Count + "개의 선택 선에 " + placedCount + "개의 케이블 트레이를 배치했습니다.");
                 return Result.Succeeded;
             }
             catch (OperationCanceledException)

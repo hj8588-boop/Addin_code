@@ -10,6 +10,7 @@ namespace TunnelCableTrayPlacementAddin
     public static class TunnelCableTrayPlacementService
     {
         private const double FeetPerMm = 1.0 / 304.8;
+        private const double MinCreatedCurveLength = FeetPerMm;
 
         public static Curve GetCurveFromElement(Element element)
         {
@@ -93,6 +94,19 @@ namespace TunnelCableTrayPlacementAddin
             if (curves.Count > 0)
                 return curves;
 
+            Element element = document == null || reference == null
+                ? null
+                : document.GetElement(reference.ElementId);
+            ImportInstance importInstance = element as ImportInstance;
+            FamilyInstance familyInstance = element as FamilyInstance;
+            if ((importInstance != null || familyInstance != null) && reference.GlobalPoint != null)
+            {
+                IList<Curve> elementCurves = GetCurvesFromElement(element);
+                curves.AddRange(GetClosestCurves(elementCurves, reference.GlobalPoint, 1));
+                if (curves.Count > 0)
+                    return curves;
+            }
+
             Curve curve = GetCurveFromReference(document, reference);
             if (curve != null)
             {
@@ -100,9 +114,6 @@ namespace TunnelCableTrayPlacementAddin
                 return curves;
             }
 
-            Element element = document == null || reference == null
-                ? null
-                : document.GetElement(reference.ElementId);
             curves.AddRange(GetCurvesFromElement(element));
             return curves;
         }
@@ -385,8 +396,7 @@ namespace TunnelCableTrayPlacementAddin
             options.ComputeReferences = true;
             options.IncludeNonVisibleObjects = true;
             GeometryElement geometryElement = element.get_Geometry(options);
-            Transform transform = GetElementTransform(element);
-            CollectCurvesFromGeometry(geometryElement, transform, curves);
+            CollectCurvesFromGeometry(geometryElement, Transform.Identity, curves);
             return curves;
         }
 
@@ -425,7 +435,7 @@ namespace TunnelCableTrayPlacementAddin
                 foreach (Edge solidEdge in solid.Edges)
                 {
                     Curve edgeCurve = solidEdge.AsCurve();
-                    if (edgeCurve != null && edgeCurve.Length > 1e-9)
+                    if (edgeCurve != null && edgeCurve.Length > MinCreatedCurveLength)
                         curves.Add(transform == null || transform.IsIdentity ? edgeCurve : edgeCurve.CreateTransformed(transform));
                 }
                 return;
@@ -442,10 +452,11 @@ namespace TunnelCableTrayPlacementAddin
             GeometryInstance geometryInstance = geometryObject as GeometryInstance;
             if (geometryInstance != null)
             {
+                Transform instanceTransform = geometryInstance.Transform ?? Transform.Identity;
                 Transform nestedTransform = transform == null
-                    ? geometryInstance.Transform
-                    : transform.Multiply(geometryInstance.Transform);
-                CollectCurvesFromGeometry(geometryInstance.GetInstanceGeometry(), nestedTransform, curves);
+                    ? instanceTransform
+                    : transform.Multiply(instanceTransform);
+                CollectCurvesFromGeometry(geometryInstance.GetSymbolGeometry(), nestedTransform, curves);
             }
         }
 
@@ -458,8 +469,16 @@ namespace TunnelCableTrayPlacementAddin
             IList<XYZ> points = polyLine.GetCoordinates();
             for (int i = 0; i < points.Count - 1; i++)
             {
-                if (points[i].DistanceTo(points[i + 1]) > 1e-9)
+                if (points[i].DistanceTo(points[i + 1]) <= MinCreatedCurveLength)
+                    continue;
+
+                try
+                {
                     curves.Add(Line.CreateBound(points[i], points[i + 1]));
+                }
+                catch (Autodesk.Revit.Exceptions.ArgumentsInconsistentException)
+                {
+                }
             }
 
             return curves;
@@ -471,10 +490,37 @@ namespace TunnelCableTrayPlacementAddin
                 return new List<Curve>();
 
             return curves
-                .Where(curve => curve != null && curve.Length > 1e-9)
+                .Where(curve => curve != null && curve.Length > MinCreatedCurveLength)
                 .OrderByDescending(curve => curve.Length)
                 .Take(count)
                 .ToList();
+        }
+
+        private static IList<Curve> GetClosestCurves(IList<Curve> curves, XYZ point, int count)
+        {
+            if (curves == null || curves.Count == 0 || point == null || count <= 0)
+                return new List<Curve>();
+
+            return curves
+                .Where(curve => curve != null && curve.Length > MinCreatedCurveLength)
+                .OrderBy(curve => GetDistanceToCurve(curve, point))
+                .Take(count)
+                .ToList();
+        }
+
+        private static double GetDistanceToCurve(Curve curve, XYZ point)
+        {
+            try
+            {
+                IntersectionResult result = curve.Project(point);
+                if (result != null && result.XYZPoint != null)
+                    return point.DistanceTo(result.XYZPoint);
+            }
+            catch
+            {
+            }
+
+            return double.MaxValue;
         }
 
         private static List<PathSegment> BuildPath(IList<Curve> curves, XYZ preferredDirection)
@@ -508,7 +554,7 @@ namespace TunnelCableTrayPlacementAddin
                 XYZ start = points[i];
                 XYZ end = points[i + 1];
                 double length = start.DistanceTo(end);
-                if (length < 1e-9)
+                if (length < MinCreatedCurveLength)
                     continue;
 
                 result.Add(new PathSegment(start, end, cumulative, cumulative + length));
