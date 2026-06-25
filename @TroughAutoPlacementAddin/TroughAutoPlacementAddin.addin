@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>&#xD2B8;&#xB85C;&#xD504; &#xC790;&#xB3D9; &#xBC30;&#xCE58;</Name>
+    <Assembly>%APPDATA%\Autodesk\Revit\Addins\2024\TroughAutoPlacementAddin\TroughAutoPlacementAddin.dll</Assembly>
+    <AddInId>6A7155E1-C7BC-48CF-A125-BF14D45A4F4E</AddInId>
+    <FullClassName>TroughAutoPlacementAddin.App</FullClassName>
+    <VendorId>CODEX</VendorId>
+    <VendorDescription>Dynamo-based trough auto placement</VendorDescription>
+  </AddIn>
+</RevitAddIns>
