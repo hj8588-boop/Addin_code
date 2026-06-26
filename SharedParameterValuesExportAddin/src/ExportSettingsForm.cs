@@ -11,12 +11,13 @@ namespace SharedParameterValuesExportAddin
     public class ExportSettingsForm : System.Windows.Forms.Form
     {
         private readonly Document document;
-        private readonly ListBox categoryList = new ListBox();
+        private readonly CheckedListBox categoryList = new CheckedListBox();
         private readonly ListBox availableParameterList = new ListBox();
         private readonly ListBox exportParameterList = new ListBox();
         private readonly TextBox outputPathTextBox = new TextBox();
         private readonly TextBox sheetNameTextBox = new TextBox();
         private readonly IList<Category> categories;
+        private bool suppressCategoryCheckRefresh;
         private static readonly Font EnglishUiFont = new Font("Arial", 9F, FontStyle.Regular, GraphicsUnit.Point);
         private static readonly Font KoreanUiFont = new Font("Malgun Gothic", 9F, FontStyle.Regular, GraphicsUnit.Point);
         private static readonly Font TitleUiFont = new Font("Arial", 10F, FontStyle.Bold, GraphicsUnit.Point);
@@ -123,9 +124,9 @@ namespace SharedParameterValuesExportAddin
             layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 
             categoryList.Dock = DockStyle.Fill;
+            categoryList.CheckOnClick = true;
             categoryList.IntegralHeight = false;
-            categoryList.SelectionMode = SelectionMode.MultiExtended;
-            categoryList.SelectedIndexChanged += (sender, args) => LoadParametersForSelectedCategories();
+            categoryList.ItemCheck += CategoryList_ItemCheck;
 
             availableParameterList.Dock = DockStyle.Fill;
             availableParameterList.IntegralHeight = false;
@@ -153,9 +154,20 @@ namespace SharedParameterValuesExportAddin
 
         private System.Windows.Forms.Control CreateCategoryPanel()
         {
-            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 1, ColumnCount = 1 };
+            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            layout.Controls.Add(categoryList, 0, 0);
+
+            var buttons = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true };
+            var selectAllButton = new Button { Text = "Select all", Width = 86 };
+            selectAllButton.Click += (sender, args) => SetAllCategoriesChecked(true);
+            var clearButton = new Button { Text = "Clear", Width = 86 };
+            clearButton.Click += (sender, args) => SetAllCategoriesChecked(false);
+            buttons.Controls.Add(selectAllButton);
+            buttons.Controls.Add(clearButton);
+
+            layout.Controls.Add(buttons, 0, 0);
+            layout.Controls.Add(categoryList, 0, 1);
             return CreateTitledPanel("Categories", layout);
         }
 
@@ -322,13 +334,21 @@ namespace SharedParameterValuesExportAddin
                 "OST_ElectricalFixtures"
             };
 
-            foreach (Category category in categories)
+            suppressCategoryCheckRefresh = true;
+            try
             {
-                int index = categoryList.Items.Add(new CategoryListItem(category));
-                if (defaultBuiltInNames.Contains(GetBuiltInCategoryName(category)))
+                foreach (Category category in categories)
                 {
-                    categoryList.SetSelected(index, true);
+                    int index = categoryList.Items.Add(new CategoryListItem(category));
+                    if (defaultBuiltInNames.Contains(GetBuiltInCategoryName(category)))
+                    {
+                        categoryList.SetItemChecked(index, true);
+                    }
                 }
+            }
+            finally
+            {
+                suppressCategoryCheckRefresh = false;
             }
         }
 
@@ -356,6 +376,16 @@ namespace SharedParameterValuesExportAddin
                     availableParameterList.Items.Add(item);
                 }
             }
+        }
+
+        private void CategoryList_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if (suppressCategoryCheckRefresh)
+            {
+                return;
+            }
+
+            BeginInvoke((Action)LoadParametersForSelectedCategories);
         }
 
         private void AddSelectedParameters()
@@ -393,6 +423,24 @@ namespace SharedParameterValuesExportAddin
             foreach (ParameterListItem item in items)
             {
                 exportParameterList.Items.Remove(item);
+            }
+
+            LoadParametersForSelectedCategories();
+        }
+
+        private void SetAllCategoriesChecked(bool isChecked)
+        {
+            suppressCategoryCheckRefresh = true;
+            try
+            {
+                for (int index = 0; index < categoryList.Items.Count; index++)
+                {
+                    categoryList.SetItemChecked(index, isChecked);
+                }
+            }
+            finally
+            {
+                suppressCategoryCheckRefresh = false;
             }
 
             LoadParametersForSelectedCategories();
@@ -573,7 +621,7 @@ namespace SharedParameterValuesExportAddin
 
         private IList<Category> GetSelectedCategories()
         {
-            return categoryList.SelectedItems
+            return categoryList.CheckedItems
                 .Cast<CategoryListItem>()
                 .Select(item => item.Category)
                 .ToList();
