@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Cable Generator</Name>
+    <Assembly>C:\Users\user\AppData\Roaming\Autodesk\Revit\Addins\2024\CableGeneratorAddin\CableGeneratorAddin.dll</Assembly>
+    <AddInId>0CF0334C-605D-470C-A889-9EE91E90A82E</AddInId>
+    <FullClassName>CableGeneratorAddin.App</FullClassName>
+    <VendorId>CODEX</VendorId>
+    <VendorDescription>Create parallel cable-like conduits inside selected cable trays</VendorDescription>
+  </AddIn>
+</RevitAddIns>
