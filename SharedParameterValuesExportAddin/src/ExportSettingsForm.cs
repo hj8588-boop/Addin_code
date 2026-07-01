@@ -283,7 +283,11 @@ namespace SharedParameterValuesExportAddin
             var removeButton = new Button { Text = "<", Width = 44 };
             removeButton.Click += (sender, args) => RemoveSelectedExportParameters();
             var removeAllButton = new Button { Text = "<<", Width = 44 };
-            removeAllButton.Click += (sender, args) => exportParameterList.Items.Clear();
+            removeAllButton.Click += (sender, args) =>
+            {
+                exportParameterList.Items.Clear();
+                LoadParametersForSelectedCategories();
+            };
 
             panel.Controls.Add(addButton);
             panel.Controls.Add(addAllButton);

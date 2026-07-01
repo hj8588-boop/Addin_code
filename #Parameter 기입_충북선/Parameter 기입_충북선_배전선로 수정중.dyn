@@ -526,44 +526,6 @@
     },
     {
       "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
-      "Id": "1f39c418159a45ad82c289184865912c",
-      "NodeType": "CodeBlockNode",
-      "Inputs": [],
-      "Outputs": [
-        {
-          "Id": "5eecb1e6baf947f781096a4964cd755d",
-          "Name": "",
-          "Description": "OST_ElectricalFixtures",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "c470cdb9cbe740c3b7320f7a0a59e057",
-          "Name": "",
-          "Description": "OST_LightingFixtures",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "0ebd32d14ea749b4b9f84f2c4564ef96",
-          "Name": "",
-          "Description": "OST_ElectricalEquipment",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Allows for DesignScript code to be authored directly",
-      "Code": "OST_ElectricalFixtures=0200;\nOST_LightingFixtures=0300;\nOST_ElectricalEquipment=0400;"
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
       "Id": "431ca29cf28c4a7694ea3d6015384d9f",
       "NodeType": "CodeBlockNode",
       "Inputs": [],
@@ -2476,7 +2438,7 @@
       "Inputs": [],
       "Outputs": [
         {
-          "Id": "acde0ca033d7462785bed784f6192b73",
+          "Id": "234f647c40c545aaad9ea3adae2be058",
           "Name": "",
           "Description": "Value of expression at line 1",
           "UsingDefaultValue": false,
@@ -2487,7 +2449,7 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows for DesignScript code to be authored directly",
-      "Code": "\"OST_ElectricalFixtures=0320;\n\\nOST_LightingFixtures=0320;\n\\nOST_ElectricalEquipment=0305;\n\\nOST_CableTrayFitting=0318;\n\\nOST_CableTray=0318;\n\\nOST_Conduit=0700;\n\\nOST_ConduitFitting=0800\";"
+      "Code": "\"OST_ElectricalFixtures=0320;\n\\nOST_LightingFixtures=0201;\n\\nOST_LightingDevices=0203;\n\\nOST_ElectricalEquipment=0200;\n\\nOST_CableTrayFitting=0200;\n\\nOST_CableTray=0200;\n\\nOST_Conduit=0700;\n\\nOST_ConduitFitting=0800\";"
     },
     {
       "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
@@ -2496,7 +2458,7 @@
       "Inputs": [],
       "Outputs": [
         {
-          "Id": "5f21c6454cda49c6b1f2249fda3b29ad",
+          "Id": "760b30818a1b41e29513b1806c9d8e5f",
           "Name": "",
           "Description": "Value of expression at line 1",
           "UsingDefaultValue": false,
@@ -2507,7 +2469,7 @@
       ],
       "Replication": "Disabled",
       "Description": "Allows for DesignScript code to be authored directly",
-      "Code": "\"STR PNL,TR PNL =0303;\n원제설비=0312\";"
+      "Code": "\"터널내변압기반=0202\n터널 조명 제어시스템=0203;\n접속함 1회로용=0201\";"
     },
     {
       "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
@@ -3223,15 +3185,15 @@
       "IsHidden": "False"
     },
     {
-      "Start": "acde0ca033d7462785bed784f6192b73",
+      "Start": "234f647c40c545aaad9ea3adae2be058",
       "End": "278f8c6da9a84acda7de94b87cf37a31",
-      "Id": "02d0529256694862a05dd53481999231",
+      "Id": "2132fbedf40e47879373da2214312eea",
       "IsHidden": "False"
     },
     {
-      "Start": "5f21c6454cda49c6b1f2249fda3b29ad",
+      "Start": "760b30818a1b41e29513b1806c9d8e5f",
       "End": "33cb6e8ea1584c87881524a825e3d738",
-      "Id": "867b7143417b4769bb279015b7b68d9f",
+      "Id": "b733a63fcae647ce848b52b29622d17e",
       "IsHidden": "False"
     },
     {
@@ -3541,16 +3503,6 @@
         "ShowGeometry": true,
         "X": 1028.5182390977593,
         "Y": 1155.5608739770023
-      },
-      {
-        "Id": "1f39c418159a45ad82c289184865912c",
-        "Name": "Code Block",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "ShowGeometry": false,
-        "X": 1038.9378012286063,
-        "Y": 1286.2480087689917
       },
       {
         "Id": "431ca29cf28c4a7694ea3d6015384d9f",
@@ -3909,8 +3861,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 1647.1964265487979,
-        "Y": 1058.5017854264381
+        "X": 1582.6336399822064,
+        "Y": 998.57201483592235
       },
       {
         "Id": "f18fcc8edad44681935929c1b5588ac6",
@@ -4059,8 +4011,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 1339.7901730091944,
-        "Y": 1332.632405650874
+        "X": 1368.54251997176,
+        "Y": 1312.2661598857237
       },
       {
         "Id": "f847ecdce7854a14b4ccf64775c959d1",
@@ -4169,8 +4121,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 605.25832377641086,
-        "Y": 1240.3876142098113
+        "X": 660.697426621692,
+        "Y": 1163.6968552738394
       },
       {
         "Id": "851e99f5255143b4a69b743c00a1b945",
@@ -4179,8 +4131,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 506.39096588348525,
-        "Y": 1926.2927651318041
+        "X": 508.33821432457853,
+        "Y": 1929.2136377934441
       },
       {
         "Id": "df193330f9b045c4adb5d91d0eff7e8a",
@@ -4249,8 +4201,8 @@
         "IsSetAsOutput": false,
         "Excluded": false,
         "ShowGeometry": true,
-        "X": 1527.0446252631657,
-        "Y": 1631.7962257274792
+        "X": 1409.7987912797787,
+        "Y": 1596.0821982700666
       },
       {
         "Id": "42de717fddc444fe80b8a3839dd5ea95",
@@ -4264,8 +4216,8 @@
       }
     ],
     "Annotations": [],
-    "X": -642.47752110890963,
-    "Y": -1342.7395094751312,
-    "Zoom": 1.2082426778244331
+    "X": -390.5482020222002,
+    "Y": -641.48434888964607,
+    "Zoom": 0.8555847576438339
   }
 }

@@ -8,7 +8,12 @@ namespace CableGeneratorAddin
     {
         public bool AllowElement(Element elem)
         {
-            return elem is CableTray;
+            if (elem is CableTray)
+                return true;
+
+            Category category = elem == null ? null : elem.Category;
+            return category != null
+                && category.Id.Value == (long)BuiltInCategory.OST_CableTrayFitting;
         }
 
         public bool AllowReference(Reference reference, XYZ position)

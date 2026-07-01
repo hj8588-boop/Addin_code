@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>IFC Review Addin</Name>
+    <Assembly>%APPDATA%\Autodesk\Revit\Addins\2024\IfcReviewAddin\IfcReviewAddin.dll</Assembly>
+    <AddInId>9B46D9E0-4694-4FA0-985C-3D6D85EF0A53</AddInId>
+    <FullClassName>IfcReviewAddin.App</FullClassName>
+    <VendorId>CODEX</VendorId>
+    <VendorDescription>IFC export target review and detailed parameter report tool</VendorDescription>
+  </AddIn>
+</RevitAddIns>

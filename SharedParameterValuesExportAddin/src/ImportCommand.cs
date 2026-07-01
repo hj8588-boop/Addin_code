@@ -1,5 +1,6 @@
 using System;
-using System.Linq;
+using System.IO;
+using System.Reflection;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -13,41 +14,14 @@ namespace SharedParameterValuesExportAddin
         {
             try
             {
-                UIDocument uiDocument = commandData.Application.ActiveUIDocument;
-                Document document = uiDocument == null ? null : uiDocument.Document;
-
-                if (document == null)
-                {
-                    message = "Open a Revit document before running the importer.";
-                    TaskDialog.Show("Shared Parameter Import", message);
-                    return Result.Cancelled;
-                }
-
-                using (var form = new ImportSettingsForm(document))
-                {
-                    if (form.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-                    {
-                        return Result.Cancelled;
-                    }
-
-                    ImportResult result = ParameterImportService.Import(document, form.Options);
-                    string failedPreview = string.Join("\n", result.Failed.Take(8).ToArray());
-                    string skippedPreview = string.Join("\n", result.Skipped.Take(8).ToArray());
-
-                    TaskDialog.Show(
-                        "Shared Parameter Import",
-                        string.Format(
-                            "Import complete.\n\nFile: {0}\nUpdated elements: {1}\nUpdated values: {2}\nSkipped rows: {3}\nFailed values: {4}\n\nFailed preview:\n{5}\n\nSkipped preview:\n{6}",
-                            result.FilePath,
-                            result.UpdatedElementCount,
-                            result.UpdatedValueCount,
-                            result.Skipped.Count,
-                            result.Failed.Count,
-                            failedPreview,
-                            skippedPreview));
-
-                    return Result.Succeeded;
-                }
+                return RunEngine("RunImport", commandData.Application, ref message);
+            }
+            catch (TargetInvocationException ex)
+            {
+                Exception inner = ex.InnerException ?? ex;
+                message = inner.Message;
+                TaskDialog.Show("Shared Parameter Import - Error", inner.ToString());
+                return Result.Cancelled;
             }
             catch (Exception ex)
             {
@@ -55,6 +29,34 @@ namespace SharedParameterValuesExportAddin
                 TaskDialog.Show("Shared Parameter Import - Error", ex.ToString());
                 return Result.Cancelled;
             }
+        }
+
+        private static Result RunEngine(string methodName, UIApplication application, ref string message)
+        {
+            string addinFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string enginePath = Path.Combine(addinFolder, "SharedParameterValuesExportEngine.dll");
+            if (!File.Exists(enginePath))
+            {
+                message = "Engine DLL not found:\n" + enginePath;
+                TaskDialog.Show("Shared Parameter Import", message);
+                return Result.Cancelled;
+            }
+
+            Assembly engineAssembly = Assembly.Load(File.ReadAllBytes(enginePath));
+            Type entryType = engineAssembly.GetType("SharedParameterValuesExportAddin.EngineEntry");
+            MethodInfo runMethod = entryType == null
+                ? null
+                : entryType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Static);
+
+            if (runMethod == null)
+            {
+                message = "EngineEntry." + methodName + " was not found.";
+                TaskDialog.Show("Shared Parameter Import", message);
+                return Result.Cancelled;
+            }
+
+            object result = runMethod.Invoke(null, new object[] { application });
+            return result is Result ? (Result)result : Result.Succeeded;
         }
     }
 }

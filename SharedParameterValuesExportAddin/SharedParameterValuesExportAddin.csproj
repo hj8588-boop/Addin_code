@@ -52,20 +52,7 @@
   <ItemGroup>
     <Compile Include="src\App.cs" />
     <Compile Include="src\Command.cs" />
-    <Compile Include="src\ExportOptions.cs" />
-    <Compile Include="src\ExportResult.cs" />
-    <Compile Include="src\ExportSettingsForm.cs" />
     <Compile Include="src\ImportCommand.cs" />
-    <Compile Include="src\ImportOptions.cs" />
-    <Compile Include="src\ImportResult.cs" />
-    <Compile Include="src\ImportSettingsForm.cs" />
-    <Compile Include="src\ParameterOrigin.cs" />
-    <Compile Include="src\ParameterScope.cs" />
-    <Compile Include="src\ParameterSelection.cs" />
-    <Compile Include="src\ParameterExportService.cs" />
-    <Compile Include="src\ParameterImportService.cs" />
-    <Compile Include="src\SpreadsheetReader.cs" />
-    <Compile Include="src\XlsxWriter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

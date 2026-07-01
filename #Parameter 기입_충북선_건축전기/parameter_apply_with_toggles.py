@@ -80,94 +80,43 @@ def to_bool(value):
 
 
 def split_category_rules(text):
-    separators = ["\r\n", "\n", "|", ";"]
-    parts = [text]
-    for separator in separators:
-        next_parts = []
-        for part in parts:
-            next_parts.extend(part.split(separator))
-        parts = next_parts
-    return [part.strip() for part in parts if part and part.strip()]
+    return [part.strip() for part in re.split(r"\r\n|\n|\||;", text) if part and part.strip()]
 
 
-def parse_category_value_map(value):
+def parse_value_map(value, family_scope=False, default_category_key=None):
     text = normalize_text(value)
-    if "=" not in text:
+    if "=" not in text or (family_scope and "::" not in text and default_category_key is None):
         return None
 
-    mapping = {}
+    mapping = {default_category_key: {}} if family_scope and default_category_key else {}
     for part in split_category_rules(text):
-        if "=" not in part:
-            return None
-        key, mapped_value = part.split("=", 1)
-        normalized = normalize_key(key)
-        if not normalized:
-            return None
-        mapping[normalized] = normalize_text(mapped_value)
-
-    return mapping if mapping else None
-
-
-def parse_family_value_map(value):
-    text = normalize_text(value)
-    if "::" not in text or "=" not in text:
-        return None
-
-    mapping = {}
-    for part in split_category_rules(text):
-        if "::" not in part or "=" not in part:
-            return None
-
-        scope, mapped_value = part.split("=", 1)
-        category_name, family_name = scope.split("::", 1)
-        category_key = normalize_key(category_name)
-        family_key = normalize_key(family_name)
-
-        if not category_key or not family_key:
-            return None
-
-        if category_key not in mapping:
-            mapping[category_key] = {}
-
-        mapping[category_key][family_key] = normalize_text(mapped_value)
-
-    return mapping if mapping else None
-
-
-def parse_level8_category_family_rules(value, default_category_key):
-    text = normalize_text(value)
-    if not text or "=" not in text:
-        return None
-
-    mapping = {default_category_key: {}}
-    for part in split_category_rules(text):
-        if "=" not in part:
-            return None
-
-        scope, mapped_value = part.split("=", 1)
-        scope = normalize_text(scope)
-        category_name = default_category_key
-        family_name = scope
-
-        if "::" in scope:
-            category_name, family_name = scope.split("::", 1)
-            category_name = normalize_key(category_name)
-            family_name = normalize_key(family_name)
+        if "=" in part:
+            scope, mapped_value = part.split("=", 1)
+            resolved_value = normalize_text(mapped_value)
         else:
-            family_name = normalize_key(family_name)
+            scope = part
+            resolved_value = ""
+        scope = normalize_text(scope)
 
-        if not family_name:
-            return None
-
-        if not category_name:
+        if family_scope:
             category_name = default_category_key
+            family_name = scope
+            if "::" in scope:
+                category_name, family_name = scope.split("::", 1)
+            category_key = normalize_key(category_name) or default_category_key
+            family_key = normalize_key(family_name)
+            if not category_key or not family_key:
+                return None
+            if category_key not in mapping:
+                mapping[category_key] = {}
+            mapping[category_key][family_key] = resolved_value
+        else:
+            category_key = normalize_key(scope)
+            if not category_key:
+                return None
+            mapping[category_key] = resolved_value
 
-        if category_name not in mapping:
-            mapping[category_name] = {}
-
-        mapping[category_name][family_name] = normalize_text(mapped_value)
-
-    return mapping
+    return mapping if mapping else None
 
 
 def build_level8_family_rule_map(value):
@@ -179,7 +128,7 @@ def build_level8_family_rule_map(value):
                 if index < len(LEVEL8_FAMILY_RULE_CATEGORIES)
                 else "ostelectricalequipment"
             )
-            parsed = parse_level8_category_family_rules(raw_item, category_key)
+            parsed = parse_value_map(raw_item, family_scope=True, default_category_key=category_key)
             if parsed is None:
                 continue
             for parsed_category_key, rules in parsed.items():
@@ -188,7 +137,7 @@ def build_level8_family_rule_map(value):
                 combined[parsed_category_key].update(rules)
         return combined if combined else None
 
-    return parse_level8_category_family_rules(value, "ostelectricalequipment")
+    return parse_value_map(value, family_scope=True, default_category_key="ostelectricalequipment")
 
 
 def get_category_keys(element):
@@ -241,7 +190,7 @@ def get_family_keys(element):
 
 
 def resolve_value_for_element(raw_value, element):
-    family_mapping = parse_family_value_map(raw_value)
+    family_mapping = parse_value_map(raw_value, family_scope=True)
     if family_mapping is not None:
         category_keys = get_category_keys(element)
         family_keys = get_family_keys(element)
@@ -263,7 +212,7 @@ def resolve_value_for_element(raw_value, element):
         category_name = category.Name if category is not None else "Unknown"
         return False, None, "No family mapping found for '{0}'.".format(category_name)
 
-    mapping = parse_category_value_map(raw_value)
+    mapping = parse_value_map(raw_value)
     if mapping is None:
         return True, raw_value, ""
 
@@ -280,9 +229,8 @@ def resolve_value_for_element(raw_value, element):
     return False, None, "No category mapping found for '{0}'.".format(category_name)
 
 
-def resolve_level8_value_for_element(raw_value, family_rules_value, element):
+def resolve_level8_value_for_element(raw_value, family_rules, element):
     category_keys = get_category_keys(element)
-    family_rules = build_level8_family_rule_map(family_rules_value)
 
     if family_rules is not None:
         family_keys = get_family_keys(element)
@@ -369,6 +317,7 @@ for item in flatten_list(elements_input):
 parameter_names = flatten_list(parameter_names_input)
 values = flatten_list(values_input)
 toggles = flatten_list(toggles_input)
+level8_family_rules = build_level8_family_rule_map(level8_family_rules_input)
 
 if not elements:
     raise Exception("No target elements were found.")
@@ -380,6 +329,7 @@ if pair_count == 0:
 applied = []
 skipped = []
 failed = []
+wbs_rows = []
 
 TransactionManager.Instance.EnsureInTransaction(doc)
 
@@ -397,18 +347,18 @@ try:
             skipped.append({"parameter": parameter_name, "reason": "Toggle is off."})
             continue
 
+        if parameter_name == "17.A3_WBS Code":
+            wbs_rows.append((parameter_name, raw_value))
+            continue
+
         success_count = 0
         failure_count = 0
         row_messages = []
 
         for element in elements:
-            if parameter_name == "17.A3_WBS Code":
-                ok = True
-                resolved_value = resolve_wbs_code_value(element)
-                resolve_message = ""
-            elif parameter_name == "16.A3_Level8":
+            if parameter_name == "16.A3_Level8":
                 ok, resolved_value, resolve_message = resolve_level8_value_for_element(
-                    raw_value, level8_family_rules_input, element
+                    raw_value, level8_family_rules, element
                 )
             else:
                 ok, resolved_value, resolve_message = resolve_value_for_element(raw_value, element)
@@ -418,6 +368,43 @@ try:
                 continue
 
             parameter = None
+            try:
+                parameter = element.LookupParameter(parameter_name)
+            except Exception:
+                parameter = None
+
+            ok, message = set_parameter_value(parameter, resolved_value)
+            if ok:
+                success_count += 1
+            else:
+                failure_count += 1
+                if message:
+                    row_messages.append(message)
+
+        if success_count > 0:
+            applied.append({
+                "parameter": parameter_name,
+                "value": raw_value,
+                "successCount": success_count,
+                "failureCount": failure_count,
+                "messages": row_messages[:10],
+            })
+        else:
+            failed.append({
+                "parameter": parameter_name,
+                "value": raw_value,
+                "reason": "No elements were updated.",
+                "messages": row_messages[:10],
+            })
+
+    for parameter_name, raw_value in wbs_rows:
+        success_count = 0
+        failure_count = 0
+        row_messages = []
+
+        for element in elements:
+            resolved_value = resolve_wbs_code_value(element)
+
             try:
                 parameter = element.LookupParameter(parameter_name)
             except Exception:
