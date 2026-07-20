@@ -20,6 +20,98 @@ namespace TunnelCableTrayPlacementAddin
 
             try
             {
+                Reference pickedReference = uiDocument.Selection.PickObject(
+                    Autodesk.Revit.UI.Selection.ObjectType.PointOnElement,
+                    new TunnelCenterlineSelectionFilter(document),
+                    "케이블 트레이 기준선 하나를 선택하세요. 연결된 선은 자동으로 추적합니다.");
+
+                if (pickedReference == null)
+                    return Result.Cancelled;
+
+                IList<Curve> tracedCurves = ConnectedCurveTracer.Trace(document, pickedReference, 50.0);
+                IList<Curve> centerlineCurves = tracedCurves;
+
+                var centerlines = centerlineCurves
+                    .Where(curve => curve != null)
+                    .ToList();
+
+                if (centerlines.Count == 0)
+                {
+                    TaskDialog.Show("Tunnel Cable Tray Placement", "선택한 선에서 연결 경로를 찾을 수 없습니다.");
+                    return Result.Cancelled;
+                }
+
+                XYZ preferredStartPoint = pickedReference.GlobalPoint;
+                XYZ preferredDirection = TunnelCableTrayPlacementService.GetCurveDirection(centerlines[0]);
+                var previewIds = new List<ElementId>();
+                PlacementSettings settings;
+                bool keepPreview;
+
+                using (var form = new TunnelCableTrayPlacementForm(document))
+                {
+                    form.Text = "Tunnel Cable Tray Placement - "
+                        + ConnectedCurveTracer.LastConnectedCount
+                        + "\uAC1C \uC5F0\uACB0\uC120 / "
+                        + System.Math.Round(ConnectedCurveTracer.LastPathLengthMm).ToString("N0")
+                        + " mm";
+                    form.PreviewPlacement = previewSettings =>
+                    {
+                        TunnelCableTrayPlacementService.DeletePreviewTrays(document, previewIds);
+                        previewIds = TunnelCableTrayPlacementService
+                            .PreviewTrays(document, centerlines, previewSettings, preferredDirection, preferredStartPoint)
+                            .ToList();
+                        return previewIds.Count;
+                    };
+
+                    if (form.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                    {
+                        TunnelCableTrayPlacementService.DeletePreviewTrays(document, previewIds);
+                        return Result.Cancelled;
+                    }
+
+                    settings = form.Settings;
+                    keepPreview = form.PreviewIsCurrent && previewIds.Count > 0;
+                }
+
+                int placedCount;
+                if (keepPreview)
+                {
+                    placedCount = previewIds.Count;
+                }
+                else
+                {
+                    TunnelCableTrayPlacementService.DeletePreviewTrays(document, previewIds);
+                    placedCount = TunnelCableTrayPlacementService.PlaceTrays(
+                        document,
+                        centerlines,
+                        settings,
+                        preferredDirection,
+                        preferredStartPoint);
+                }
+
+                TaskDialog.Show(
+                    "Tunnel Cable Tray Placement",
+                    centerlines.Count + "개의 연결 선을 추적하여 " + placedCount + "개의 케이블 트레이를 배치했습니다.");
+                return Result.Succeeded;
+            }
+            catch (OperationCanceledException)
+            {
+                return Result.Cancelled;
+            }
+        }
+
+        private static Result RunLegacy(UIApplication application)
+        {
+            UIDocument uiDocument = application.ActiveUIDocument;
+            Document document = uiDocument == null ? null : uiDocument.Document;
+            if (document == null)
+            {
+                TaskDialog.Show("Tunnel Cable Tray Placement", "Revit 문서를 먼저 열어주세요.");
+                return Result.Cancelled;
+            }
+
+            try
+            {
                 IList<Reference> pickedReferences = uiDocument.Selection.PickObjects(
                     Autodesk.Revit.UI.Selection.ObjectType.PointOnElement,
                     new TunnelCenterlineSelectionFilter(document),

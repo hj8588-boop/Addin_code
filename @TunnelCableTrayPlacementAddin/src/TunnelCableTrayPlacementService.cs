@@ -263,6 +263,15 @@ namespace TunnelCableTrayPlacementAddin
                 : Math.Min(totalLength, settings.EndDistanceMm * FeetPerMm);
             double segmentLength = Math.Max(1.0 * FeetPerMm, settings.SegmentLengthMm * FeetPerMm);
 
+            double requestedEndDistance = settings.EndDistanceMm * FeetPerMm;
+            if (settings.EndDistanceMm > 0.0 && requestedEndDistance > totalLength + FeetPerMm)
+            {
+                throw new InvalidOperationException(
+                    "종료 거리 " + settings.EndDistanceMm.ToString("N0")
+                    + "mm까지 연결 경로를 찾지 못했습니다. 추적된 경로 길이는 "
+                    + (totalLength / FeetPerMm).ToString("N0") + "mm입니다.");
+            }
+
             if (startDistance >= endDistance)
                 throw new InvalidOperationException("시작 거리는 종료 거리보다 작아야 합니다.");
 

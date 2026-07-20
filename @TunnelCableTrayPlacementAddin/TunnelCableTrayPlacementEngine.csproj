@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\CableTrayTypeListItem.cs" />
+    <Compile Include="src\ConnectedCurveTracer.cs" />
     <Compile Include="src\EngineEntry.cs" />
     <Compile Include="src\PlacementSettings.cs" />
     <Compile Include="src\TunnelCableTrayPlacementForm.cs" />
