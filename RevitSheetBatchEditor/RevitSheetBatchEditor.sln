@@ -1,0 +1,24 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevitSheetBatchEditor.Loader", "src\RevitSheetBatchEditor.Loader\RevitSheetBatchEditor.Loader.csproj", "{A5784286-C627-426A-A7F5-221E5864A953}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevitSheetBatchEditor.Engine", "src\RevitSheetBatchEditor.Engine\RevitSheetBatchEditor.Engine.csproj", "{389A6BA2-46E2-455B-B691-B0CC77CAFB01}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A5784286-C627-426A-A7F5-221E5864A953}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5784286-C627-426A-A7F5-221E5864A953}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5784286-C627-426A-A7F5-221E5864A953}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5784286-C627-426A-A7F5-221E5864A953}.Release|Any CPU.Build.0 = Release|Any CPU
+		{389A6BA2-46E2-455B-B691-B0CC77CAFB01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{389A6BA2-46E2-455B-B691-B0CC77CAFB01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{389A6BA2-46E2-455B-B691-B0CC77CAFB01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{389A6BA2-46E2-455B-B691-B0CC77CAFB01}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

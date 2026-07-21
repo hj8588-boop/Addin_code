@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Revit Sheet Batch Editor</Name>
+    <Assembly>C:\ProgramData\Autodesk\Revit\Addins\2024\RevitSheetBatchEditor\RevitSheetBatchEditor.Loader.dll</Assembly>
+    <AddInId>08D83E9C-1C34-4B12-8537-046E154CA3AE</AddInId>
+    <FullClassName>RevitSheetBatchEditor.Loader.App</FullClassName>
+    <VendorId>OpenAI.Codex</VendorId>
+    <VendorDescription>Revit sheet and title block batch editor</VendorDescription>
+  </AddIn>
+</RevitAddIns>
